@@ -30,9 +30,16 @@ TEXTURE_HEIGHT = 1200
 TEXTURE_SCALE = TEXTURE_WIDTH // TILE
 
 # player settings
-player_pos = (HALF_WIDTH, HALF_HEIGHT)
+player_pos = (150, 150)
 player_angle = 0
-player_speed = 2
+
+# directions
+DIRECTIONS = {
+    0: "ahead",
+    3.14: "behind",
+    4.72: "left",
+    1.56: "right"
+}
 
 # colors
 WHITE = (255, 255, 255)
