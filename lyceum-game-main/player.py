@@ -1,4 +1,6 @@
 from settings import *
+from map import world_map
+
 import pygame
 import math
 
@@ -30,8 +32,10 @@ class Player:
         if pygame.time.get_ticks() - self.last_time > 550:
 
             if keys[pygame.K_w]:
-                self.position = [self.position[0] + TILE * cos_a, self.position[1] + TILE * sin_a]
-                self.correction_move()
+                pos = [self.position[0] + TILE * cos_a, self.position[1] + TILE * sin_a]
+                if not check_wall(world_map, pos):
+                    self.position = pos
+                    self.correction_move()
             if keys[pygame.K_s]:
                 if DIRECTIONS[self.angle] == "ahead":
                     self.rotate = 3.14
@@ -112,5 +116,11 @@ def rounding_up_coordinates(i):
     elif (n % 10) > 7.5:
         n = (n // 10 + 1) * 100
 
-    print(i + n)
     return i + n
+
+
+def check_wall(this_map, position):
+    for tile in this_map:
+        if tile[0] < position[0] < tile[0] + 100 and tile[1] < position[1] < tile[1] + 100:
+            return True
+    return False

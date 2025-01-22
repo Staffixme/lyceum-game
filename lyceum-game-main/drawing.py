@@ -11,7 +11,8 @@ class Drawing:
         self.font = pygame.font.SysFont('Arial', 36, bold=True)
         self.textures = {'1': pygame.image.load('texture/wall_1.png').convert(),
                          '2': pygame.image.load('texture/wall_2.png').convert(),
-                         'S': pygame.image.load('texture/sky_1.png').convert()
+                         'S': pygame.image.load('texture/Ceiling_1.png').convert(),
+                         'M': pygame.image.load('texture/Floor_1.png').convert(),
                          }
 
     def background(self, angle):
@@ -19,6 +20,13 @@ class Drawing:
         self.sc.blit(self.textures['S'], (sky_offset, 0))
         self.sc.blit(self.textures['S'], (sky_offset - WIDTH, 0))
         self.sc.blit(self.textures['S'], (sky_offset + WIDTH, 0))
+
+        # floor_offset = -5 * math.degrees(angle) % WIDTH
+        # self.sc.blit(self.textures['M'], (floor_offset, 400))
+        # self.sc.blit(self.textures['M'], (floor_offset - WIDTH, 400))
+        # self.sc.blit(self.textures['M'], (floor_offset + WIDTH, 400))
+
+        # pygame.draw.rect(self.sc, PURPLE, (0, 0, WIDTH, HALF_HEIGHT))
         pygame.draw.rect(self.sc, DARKGRAY, (0, HALF_HEIGHT, WIDTH, HALF_HEIGHT))
 
     def world(self, player_pos, player_angle):
