@@ -12,7 +12,7 @@ text_map = [
 ]
 
 world_map = {}
-empty_map = {}
+event_map = {}
 mini_map = set()
 for j, row in enumerate(text_map):
     for i, char in enumerate(row):

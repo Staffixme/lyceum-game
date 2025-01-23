@@ -37,44 +37,37 @@ class Player:
                     self.position = pos
                     self.correction_move()
             if keys[pygame.K_s]:
-                if DIRECTIONS[self.angle] == "ahead":
-                    self.rotate = 3.14
-                elif DIRECTIONS[self.angle] == "behind":
-                    self.rotate = 0
-                elif DIRECTIONS[self.angle] == "left":
-                    self.rotate = 1.56
-                elif DIRECTIONS[self.angle] == "right":
-                    self.rotate = 4.72
+                self.rotate += 1.58 * 2
+                self.rotate %= 6.320001
+                self.rotate = round(self.rotate, 2)
                 self.correction_move()
             if keys[pygame.K_a]:
-                if DIRECTIONS[self.angle] == "ahead":
-                    self.rotate = 4.72
-                elif DIRECTIONS[self.angle] == "behind":
-                    self.rotate = 1.56
-                elif DIRECTIONS[self.angle] == "left":
-                    self.rotate = 3.14
-                elif DIRECTIONS[self.angle] == "right":
-                    self.rotate = 0
+                self.rotate -= 1.58
+                self.rotate %= 6.320001
+                self.rotate = round(self.rotate, 2)
                 self.correction_move()
+                print(self.rotate)
             if keys[pygame.K_d]:
-                if DIRECTIONS[self.angle] == "ahead":
-                    self.rotate = 1.56
-                elif DIRECTIONS[self.angle] == "behind":
-                    self.rotate = 4.72
-                elif DIRECTIONS[self.angle] == "left":
-                    self.rotate = 0
-                elif DIRECTIONS[self.angle] == "right":
-                    self.rotate = 3.14
+                self.rotate += 1.58
+                self.rotate %= 6.320001
+                self.rotate = round(self.rotate, 2)
                 self.correction_move()
+                print(self.rotate)
 
         if self.angle < self.rotate:
             self.angle += self.delta_rotate / self.rotate_speed
             if self.rotate - self.angle < 0.01:
                 self.angle = self.rotate
+                if self.rotate == 6.32:
+                    self.rotate = player_angle
+                    self.angle = player_angle
         elif self.angle > self.rotate:
             self.angle -= self.delta_rotate / self.rotate_speed
             if self.angle - self.rotate < 0.01:
                 self.angle = self.rotate
+                if self.rotate == 6.32:
+                    self.rotate = player_angle
+                    self.angle = player_angle
 
         # movement
         if not self.x == self.position[0]:
@@ -120,6 +113,13 @@ def rounding_up_coordinates(i):
 
 
 def check_wall(this_map, position):
+    for tile in this_map:
+        if tile[0] < position[0] < tile[0] + 100 and tile[1] < position[1] < tile[1] + 100:
+            return True
+    return False
+
+
+def check_event(this_map, position):
     for tile in this_map:
         if tile[0] < position[0] < tile[0] + 100 and tile[1] < position[1] < tile[1] + 100:
             return True
