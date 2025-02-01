@@ -11,6 +11,9 @@ class Drawing:
         self.font = pygame.font.SysFont('Arial', 36, bold=True)
         self.textures = {"1": pygame.image.load('texture/wall_1.png').convert(),
                          '2': pygame.image.load('texture/wall_2.png').convert(),
+                         'B': pygame.image.load('sprites/box_1.png').convert(),
+                         'E': pygame.image.load('sprites/enemy_1.png').convert(),
+
                          'S': pygame.image.load('texture/sky_3.png').convert(),
                          'M': pygame.image.load('texture/Floor_1.png').convert(),
                          }

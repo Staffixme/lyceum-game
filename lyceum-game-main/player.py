@@ -1,5 +1,6 @@
 from settings import *
-from map import world_map
+from map import world_map, event_map
+from global_events import *
 
 import pygame
 import math
@@ -29,13 +30,16 @@ class Player:
 
         keys = pygame.key.get_pressed()
 
-        if pygame.time.get_ticks() - self.last_time > 550:
 
+        if pygame.time.get_ticks() - self.last_time > 550 and player_status == 'walk':
             if keys[pygame.K_w]:
                 pos = [self.position[0] + TILE * cos_a, self.position[1] + TILE * sin_a]
                 if not check_wall(world_map, pos):
                     self.position = pos
                     self.correction_move()
+                if check_attack(event_map, pos):
+                    player_status = 'attack'
+                    attack_enemy()
             if keys[pygame.K_s]:
                 self.rotate += 1.58 * 2
                 self.rotate %= 6.320001
@@ -46,13 +50,11 @@ class Player:
                 self.rotate %= 6.320001
                 self.rotate = round(self.rotate, 2)
                 self.correction_move()
-                print(self.rotate)
             if keys[pygame.K_d]:
                 self.rotate += 1.58
                 self.rotate %= 6.320001
                 self.rotate = round(self.rotate, 2)
                 self.correction_move()
-                print(self.rotate)
 
         if self.angle < self.rotate:
             self.angle += self.delta_rotate / self.rotate_speed
@@ -119,8 +121,9 @@ def check_wall(this_map, position):
     return False
 
 
-def check_event(this_map, position):
+def check_attack(this_map, position):
     for tile in this_map:
         if tile[0] < position[0] < tile[0] + 100 and tile[1] < position[1] < tile[1] + 100:
+            del event_map[tile]
             return True
     return False
