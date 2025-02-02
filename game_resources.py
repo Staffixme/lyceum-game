@@ -44,13 +44,13 @@ class Icon(pygame.sprite.Sprite):
     def __init__(self, img: str, size: tuple):
         super().__init__()
         self.image = load_image(img)
-        pygame.transform.scale(self.image, size)
+        self.image = pygame.transform.scale(self.image, size)
         self.rect = self.image.get_rect()
 
 
 class CharacterIcon:
     def __init__(self, img):
-        self.icon = Icon("dummy_portrait.png", (180, 180))
+        self.icon = Icon(img, (180, 180))
 
     def draw_hp_bar(self, screen, x, y, width, height, cur_hp, hp):
         name = pygame.font.Font(load_font("UbuntuSans-SemiBold.ttf"), 22)
@@ -72,7 +72,7 @@ class CharacterIcon:
 
 
 CHARACTERS_PORTRAITS = {
-    "Dummy": CharacterIcon("dummy_portrait.png"),
+    "Knight": CharacterIcon("knight_portrait.png"),
     "Dummy1": CharacterIcon("dummy_portrait.png"),
     "Dummy2": CharacterIcon("dummy_portrait.png"),
     "Dummy3": CharacterIcon("dummy_portrait.png")

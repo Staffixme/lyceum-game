@@ -63,6 +63,7 @@ class Game:
         current_data.add_item(items.ITEMS["Aid"])
         current_data.add_item(items.ITEMS["Aid"])
         current_data.add_item(items.ITEMS["Aid_kit"])
+        current_data.add_item(items.ITEMS["Imba"])
         set_images(current_data.player_group)
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         current_data.set_screen_size(self.screen.size)

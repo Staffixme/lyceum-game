@@ -32,7 +32,8 @@ class AttackSkill(Skill):
             target.get_damage(self.attack)
         elif self.is_group_use:
             for i in target[1]:
-                i.get_damage(self.attack)
+                if i.is_alive:
+                    i.get_damage(self.attack)
 
 
 class HealSkill(Skill):
@@ -46,60 +47,19 @@ class HealSkill(Skill):
             target.heal(self.value)
         elif self.is_group_use:
             for i in target[0]:
-                i.heal(self.value)
-
-
-class AbsorbingSkill(Skill):
-    def __init__(self, name, description: str, attack: int, is_group_use: bool, mp: int):
-        super().__init__(name, description, mp)
-        self.attack = attack
-        self.is_group_use = is_group_use
-
-    def use_skill(self, target):
-        if not self.is_group_use:
-            Character.get_damage(self.attack)
-        elif self.is_group_use:
-            for i in target:
-                i.get_damage(self.attack)
-
-
-class BorrowingSkill(Skill):
-    def __init__(self, name, description: str, attack: int, is_group_use: bool, mp: int):
-        super().__init__(name, description, mp)
-        self.attack = attack
-        self.is_group_use = is_group_use
-
-    def use_skill(self, target):
-        if not self.is_group_use:
-            Character.get_damage(self.attack)
-        elif self.is_group_use:
-            for i in target:
-                i.get_damage(self.attack)
-
-
-class SpecialSkill(Skill):
-    def __init__(self, name, description: str, attack: int, is_group_use: bool, mp: int):
-        super().__init__(name, description, mp)
-        self.attack = attack
-        self.is_group_use = is_group_use
-
-    def use_skill(self, target):
-        if not self.is_group_use:
-            Character.get_damage(self.attack)
-        elif self.is_group_use:
-            for i in target:
-                i.get_damage(self.attack)
+                if i.is_alive:
+                    i.heal(self.value)
 
 
 class CharacterSprite(pygame.sprite.Sprite):
-    def __init__(self, idle: tuple, attack: tuple, defence: tuple, skill_item: tuple, defeated: pygame.sprite.Sprite):
+    def __init__(self, idle: tuple, attack: tuple, defence: tuple, skill_item: tuple, defeated: tuple):
         super().__init__(CHARACTERS_SPRITES)
         self.animation = "idle"
-        self.idle_state = idle
-        self.attack_state = attack
-        self.skill_item_state = skill_item
-        self.defence_state = defence
-        self.defeated_state = defeated
+        self.idle_state = self.cut_sheet(*idle)
+        self.attack_state = self.cut_sheet(*attack)
+        self.skill_item_state = self.cut_sheet(*skill_item)
+        self.defence_state = self.cut_sheet(*defence)
+        self.defeated_state = self.cut_sheet(*defeated)
         self.is_play = False
         self.animation_index = 0
         self.image = self.idle_state[self.animation_index]
@@ -107,38 +67,82 @@ class CharacterSprite(pygame.sprite.Sprite):
 
         self.current_time = 0
         self.last_update = pygame.time.get_ticks()
-        self.frame_delay = 350
+        self.frame_delay = 100
+
+    def cut_sheet(self, sprite, count):
+        frames = list()
+
+        self.rect = pygame.Rect(0, 0, sprite.get_width() // count,
+                                sprite.get_height())
+
+        for i in range(count):
+            frame_location = (self.rect.w * i, 0)
+            frame = sprite.subsurface(pygame.Rect(frame_location, self.rect.size))
+            frame = pygame.transform.scale(frame, (256, 256))
+            frames.append(frame)
+
+        return frames
 
     def change_animation(self, name):
         self.animation_index = 0
+        self.is_play = False
         self.animation = name
 
     def draw(self):
         self.current_time = pygame.time.get_ticks()
 
+        if self.animation == "attack":
+            frames_count = len(self.attack_state)
+        elif self.animation == "skill" or self.animation == "item":
+            frames_count = len(self.skill_item_state)
+        elif self.animation == "defense":
+            frames_count = len(self.defence_state)
+        elif self.animation == "defeated":
+            frames_count = len(self.defeated_state)
+        else:
+            frames_count = len(self.idle_state)
+
         if self.current_time - self.last_update > self.frame_delay:
-            self.animation_index = (self.animation_index + 1) % len(self.idle_state)
+            self.animation_index = (self.animation_index + 1) % frames_count
             self.last_update = self.current_time
 
         match self.animation:
             case "defeated":
-                self.image = self.defeated_state
+                self.image = self.defeated_state[self.animation_index]
+                if self.animation_index + 1 == frames_count and self.is_play:
+                    self.is_play = False
+                else:
+                    self.is_play = True
             case "defense":
-                self.image = self.defence_state
+                self.image = self.defence_state[self.animation_index]
+                if self.animation_index == 0 and self.is_play:
+                    self.animation = "idle"
+                    self.is_play = False
+                else:
+                    self.is_play = True
             case "idle":
-                self.image = self.idle_state[int(self.animation_index)]
+                self.image = self.idle_state[self.animation_index]
             case "attack":
-                self.is_play = True
-                self.image = self.attack_state[int(self.animation_index)]
-                if self.animation_index == 0:
+                self.image = self.attack_state[self.animation_index]
+                if self.animation_index == 0 and self.is_play:
                     self.animation = "idle"
                     self.is_play = False
-            case "skill", "item":
-                self.is_play = True
-                self.image = self.skill_item_state[int(self.animation_index)]
-                if self.animation_index == 0:
+                else:
+                    self.is_play = True
+            case "skill":
+                self.image = self.skill_item_state[self.animation_index]
+                if self.animation_index == 0 and self.is_play:
                     self.animation = "idle"
                     self.is_play = False
+                else:
+                    self.is_play = True
+            case "item":
+                self.image = self.skill_item_state[self.animation_index]
+                if self.animation_index == 0 and self.is_play:
+                    self.animation = "idle"
+                    self.is_play = False
+                else:
+                    self.is_play = True
 
 
 class Character:
@@ -174,8 +178,7 @@ class Character:
         if self.cur_health <= 0:
             self.cur_health = 0
             self.is_alive = False
-            self.sprites.image = self.sprites.defeated_state
-            self.sprites.animation = "defeated"
+            self.sprites.change_animation("defeated")
             print(f"{self.name} is death")
 
 
@@ -219,11 +222,31 @@ class HealItem(Item):
             target.heal(self.value)
         elif self.is_group_use:
             for i in target[0]:
-                i.heal(self.value)
+                if i.is_alive:
+                    i.heal(self.value)
         self.count -= 1
 
     def __copy__(self):
         return HealItem(self.name, self.description, self.value, self.is_group_use)
+
+
+class AttackItem(Item):
+    def __init__(self, name: str, description: str, value: int, is_group_use: bool):
+        super().__init__(name, description)
+        self.value = value
+        self.is_group_use = is_group_use
+
+    def use(self, target: Character | tuple):
+        if not self.is_group_use:
+            target.get_damage(self.value)
+        elif self.is_group_use:
+            for i in target[0]:
+                if i.is_alive:
+                    i.get_damage(self.value)
+        self.count -= 1
+
+    def __copy__(self):
+        return AttackItem(self.name, self.description, self.value, self.is_group_use)
 
 
 CHARACTERS_SPRITES = pygame.sprite.Group()
@@ -235,13 +258,12 @@ SKILLS = {
                                     100, True, 25),
     "Heal_skill": HealSkill("Исцеление", "Исцеляет небольшое количество ОЗ одному союзнику", 50,
                             False, 5),
-    "Special_skill": SpecialSkill("Размен", "Гарантировано нейтрализует одного противника и текущего союзника", 200,
-                                  False, 10),
 }
 
 ITEMS = {
     "Aid": HealItem("Аптечка", "Исцеляет среднее количество ОЗ одному союзнику", 100, False),
-    "Aid_kit": HealItem("Набор первой помощи", "Исцеляет большое количество ОЗ всем союзникам", 500, True)
+    "Aid_kit": HealItem("Набор первой помощи", "Исцеляет большое количество ОЗ всем союзникам", 500, True),
+    "Imba": AttackItem("Этот предмет просто имба", "Урон, мгновенно убивающий врага", 999999, False),
 }
 
 WEAPONS = {
@@ -251,62 +273,58 @@ WEAPONS = {
 
 CHARACTERS = {
     "Dummy": Hero(get_string("dummy"), 2000, 50, WEAPONS["Katana"],
-                  (SKILLS["Test_skill"], SKILLS["Test_skill_group"], SKILLS["Heal_skill"], SKILLS["Special_skill"]),
+                  (SKILLS["Test_skill"], SKILLS["Test_skill_group"], SKILLS["Heal_skill"]),
                   None,
-                  ((load_image("Sprite-0003.png"), load_image("Sprite-0003-i1.png"), load_image("Sprite-0003-i2.png")),
-                   (load_image("Sprite-0003-a1.png"), load_image("Sprite-0003-a2.png"),
-                    load_image("Sprite-0003-a3.png")),
-                   load_image("Sprite-0003-d.png"),
-                   (load_image("Sprite-0003-si1.png"), load_image("Sprite-0003-si2.png")),
-                   load_image("test_enemy_defeated.png")),
-                  CHARACTERS_PORTRAITS["Dummy"]),
+                  ((load_image("IDLE.png"), 7),
+                   (load_image("ATTACK 1.png"), 6),
+                   (load_image("DEFEND.png"), 6),
+                   (load_image("JUMP.png"), 5),
+                   (load_image("DEATH.png"), 12)),
+                  CHARACTERS_PORTRAITS["Knight"]),
     "Dummy1": Hero(get_string("dummy"), 200, 50, WEAPONS["Enemy_wp"], (SKILLS["Test_skill"], SKILLS["Heal_skill"]),
                    None,
-                   ((load_image("Sprite-0003.png"), load_image("Sprite-0003-i1.png"), load_image("Sprite-0003-i2.png")),
-                    (load_image("Sprite-0003-a1.png"), load_image("Sprite-0003-a2.png"),
-                     load_image("Sprite-0003-a3.png")),
-                    load_image("Sprite-0003-d.png"),
-                    (load_image("Sprite-0003-si1.png"), load_image("Sprite-0003-si2.png")),
-                    load_image("test_enemy_defeated.png")),
+                   ((load_image("IDLE.png"), 7),
+                    (load_image("ATTACK 1.png"), 6),
+                    (load_image("DEFEND.png"), 6),
+                    (load_image("JUMP.png"), 5),
+                    (load_image("DEATH.png"), 12)),
                    CHARACTERS_PORTRAITS["Dummy1"]),
-    "Dummy2": Hero(get_string("dummy"), 200, 50, WEAPONS["Katana"], (SKILLS["Special_skill"],), None,
-                   ((load_image("Sprite-0003.png"), load_image("Sprite-0003-i1.png"), load_image("Sprite-0003-i2.png")),
-                    (load_image("Sprite-0003-a1.png"), load_image("Sprite-0003-a2.png"),
-                     load_image("Sprite-0003-a3.png")),
-                    load_image("Sprite-0003-d.png"),
-                    (load_image("Sprite-0003-si1.png"), load_image("Sprite-0003-si2.png")),
-                    load_image("test_enemy_defeated.png")),
+    "Dummy2": Hero(get_string("dummy"), 200, 50, WEAPONS["Katana"], (SKILLS["Test_skill"],), None,
+                   ((load_image("IDLE.png"), 7),
+                    (load_image("ATTACK 1.png"), 6),
+                    (load_image("DEFEND.png"), 6),
+                    (load_image("JUMP.png"), 5),
+                    (load_image("DEATH.png"), 12)),
                    CHARACTERS_PORTRAITS["Dummy2"]),
     "Dummy3": Hero(get_string("dummy"), 200, 50, WEAPONS["Katana"], (SKILLS["Heal_skill"],), None,
-                   ((load_image("Sprite-0003.png"), load_image("Sprite-0003-i1.png"), load_image("Sprite-0003-i2.png")),
-                    (load_image("Sprite-0003-a1.png"), load_image("Sprite-0003-a2.png"),
-                     load_image("Sprite-0003-a3.png")),
-                    load_image("Sprite-0003-d.png"),
-                    (load_image("Sprite-0003-si1.png"), load_image("Sprite-0003-si2.png")),
-                    load_image("test_enemy_defeated.png")),
+                   ((load_image("IDLE.png"), 7),
+                    (load_image("ATTACK 1.png"), 6),
+                    (load_image("DEFEND.png"), 6),
+                    (load_image("JUMP.png"), 5),
+                    (load_image("DEATH.png"), 12)),
                    CHARACTERS_PORTRAITS["Dummy3"]),
 
 }
 
 ENEMIES = {
     "Dummy3": ("Враг 1", 200, WEAPONS["Katana"], (None,),
-               ((load_image("test_enemy.png"),), (load_image("Sprite-0003-a1.png"), load_image("Sprite-0003-a2.png"),
-                                                  load_image("Sprite-0003-a3.png")),
-                load_image("Sprite-0003-d.png"),
-                (load_image("Sprite-0003-si1.png"), load_image("Sprite-0003-si2.png")),
-                load_image("test_enemy_defeated.png"))),
+               ((load_image("IDLE.png"), 7),
+                (load_image("ATTACK 1.png"), 6),
+                (load_image("DEFEND.png"), 6),
+                (load_image("JUMP.png"), 5),
+                (load_image("DEATH.png"), 12))),
     "Dummy4": ("Враг 2", 200, WEAPONS["Enemy_wp"], (None,),
-               ((load_image("test_enemy.png"),), (load_image("Sprite-0003-a1.png"), load_image("Sprite-0003-a2.png"),
-                                                  load_image("Sprite-0003-a3.png")),
-                load_image("Sprite-0003-d.png"),
-                (load_image("Sprite-0003-si1.png"), load_image("Sprite-0003-si2.png")),
-                load_image("test_enemy_defeated.png"))),
+               ((load_image("IDLE.png"), 7),
+                (load_image("ATTACK 1.png"), 6),
+                (load_image("DEFEND.png"), 6),
+                (load_image("JUMP.png"), 5),
+                (load_image("DEATH.png"), 12))),
     "Dummy5": ("Враг 3", 200, WEAPONS["Enemy_wp"], (None,),
-               ((load_image("test_enemy.png"),), (load_image("Sprite-0003-a1.png"), load_image("Sprite-0003-a2.png"),
-                                                  load_image("Sprite-0003-a3.png")),
-                load_image("Sprite-0003-d.png"),
-                (load_image("Sprite-0003-si1.png"), load_image("Sprite-0003-si2.png")),
-                load_image("test_enemy_defeated.png"))),
+               ((load_image("IDLE.png"), 7),
+                (load_image("ATTACK 1.png"), 6),
+                (load_image("DEFEND.png"), 6),
+                (load_image("JUMP.png"), 5),
+                (load_image("DEATH.png"), 12))),
 }
 
 

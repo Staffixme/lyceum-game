@@ -5,7 +5,7 @@ import pygame_gui
 
 from save_data import Data, current_data
 from ui_elements import (PLAYERS_ICONS, show_enemy_name, draw_portraits, draw_battle_ui, BattleButton, Icon,
-                         ButtonGroup, ItemButton, draw_hp, draw_mp)
+                         ButtonGroup, ItemButton, draw_hp, draw_mp, draw_shield)
 from game_resources import BACKGROUNDS, load_image, load_font
 from music_manager import MusicManager
 
@@ -103,12 +103,14 @@ class BattleState(State):
                                     else:
                                         self.skill_group.cur_button.confirm(argument)
                                     self.player_party[self.move_index].cur_mana -= self.skill_group.cur_button.item.mp
+                                    self.set_animation("skill")
                                     self.move()
                             elif self.target_type == "items":
                                 if self.items_group.cur_button.item.is_group_use:
                                     self.items_group.cur_button.confirm((self.player_party, self.enemy_party))
                                 else:
                                     self.items_group.cur_button.confirm(argument)
+                                self.set_animation("item")
                                 self.move()
                             self.target_type = None
                             self.crosschair_mode = "enemy"
@@ -167,8 +169,7 @@ class BattleState(State):
                             self.input_layout = "battle"
                             InputManager.change_layout(self.input_layout)
                             item = group.cur_button.item
-                            if (isinstance(item, items.HealItem) or isinstance(item, items.HealSkill)
-                                    or isinstance(item, items.BorrowingSkill)):
+                            if isinstance(item, items.HealItem) or isinstance(item, items.HealSkill):
                                 self.crosschair_mode = "hero"
                             else:
                                 self.crosschair_mode = "enemy"
@@ -177,13 +178,19 @@ class BattleState(State):
         self.move_order[self.move_index].sprites.change_animation(name)
 
     def play_animations(self):
-        for i in self.move_order:
-            i.sprites.draw()
+        for i in self.player_party:
+            if i.is_alive or (i.sprites.animation_index + 1 != len(i.sprites.defeated_state)
+                              and i.sprites.animation == "defeated"):
+                i.sprites.draw()
+        for i in self.enemy_party:
+            if i.is_alive or (i.sprites.animation_index + 1 != len(i.sprites.defeated_state)
+                              and i.sprites.animation == "defeated"):
+                i.sprites.draw()
 
     def check_animation(self):
-        if filter(lambda x: x.sprites.is_play, self.move_order):
-            return False
-        return True
+        if list(filter(lambda x: x.sprites.is_play, self.move_order)):
+            return True
+        return False
 
     def attack(self):
         self.player_party[self.move_index].attack(self.enemy_party[self.selected_enemy_index])
@@ -199,12 +206,6 @@ class BattleState(State):
                     color = "#F87401"
                 case items.HealSkill:
                     color = "#0DBE51"
-                case items.AbsorbingSkill:
-                    color = "#51436C"
-                case items.BorrowingSkill:
-                    color = "#43666C"
-                case items.SpecialSkill:
-                    color = "#FF517C"
             skills.append(ItemButton(i, i.name, i.description, color))
         self.skill_group.set_buttons(*skills)
         self.input_layout = "ui"
@@ -217,7 +218,7 @@ class BattleState(State):
             item_list = list()
             for i in current_data.get_items():
                 match type(i):
-                    case items.AttackSkill:
+                    case items.AttackItem:
                         color = "#F87401"
                     case items.HealItem:
                         color = "#0DBE51"
@@ -260,8 +261,6 @@ class BattleState(State):
                         while not character.is_alive:
                             character = random.choice(self.player_party)
                         self.set_animation("attack")
-                        while self.move_order[self.move_index].sprites.animation != "idle":
-                            self.play_animations()
                         self.move_order[self.move_index].attack(character)
 
                         if not character.is_alive:
@@ -272,9 +271,8 @@ class BattleState(State):
 
                     self.move_index = (self.move_index + 1) % len(self.move_order)
 
-                for i in filter(lambda x: isinstance(x, items.Hero), self.move_order):
+                for i in list(filter(lambda x: isinstance(x, items.Hero), self.move_order)):
                     i.is_protected = False
-                    i.sprites.change_animation("idle")
 
             if not self.enemy_party[self.selected_enemy_index].is_alive:
                 while not self.enemy_party[self.selected_enemy_index].is_alive:
@@ -285,7 +283,7 @@ class BattleState(State):
         BACKGROUNDS.draw(surface)
         if isinstance(self.move_order[self.move_index], items.Hero):
             self.player_point.rect = self.move_order[self.move_index].sprites.rect
-            self.player_point.rect = self.player_point.rect.move(0, 98)
+            self.player_point.rect = self.player_point.rect.move(0, 58)
 
         if self.crosschair_mode == "enemy":
             self.crosschair.rect = self.enemy_party[self.selected_enemy_index].sprites.rect
@@ -295,11 +293,15 @@ class BattleState(State):
             self.crosschair.rect = self.crosschair.rect.move(92, 92)
 
         self.group.draw(surface)
-        # self.play_animations()
+        self.play_animations()
 
         screen.blit(surface, (0, 0))
         screen.blit(show_enemy_name(self.enemy_party[self.selected_enemy_index].name), (0, 0))
         screen.blit(draw_portraits(self.player_party), (0, 0))
+
+        for i in self.player_party:
+            if i.is_protected:
+                draw_shield(i.sprites.rect.x + 112, i.sprites.rect.y + 28, screen)
 
         if not self.check_animation():
             if self.crosschair_mode == "enemy":

@@ -286,3 +286,13 @@ def draw_battle_ui(current_ui, group, battle_icons, skill_group, item_group):
             return draw_items(item_group), draw_buttons(Hint("back", "Esc"))
         case "target":
             return draw_target_select(), draw_buttons(Hint("back", "Esc"))
+
+
+def draw_shield(x, y, screen):
+    shield_group = pygame.sprite.Group()
+    icon = Icon("defense_icon.png", (42, 42))
+    icon.rect.x = x
+    icon.rect.y = y
+    shield_group.add(icon)
+    shield_group.draw(screen)
+
