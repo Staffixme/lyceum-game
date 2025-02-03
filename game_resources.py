@@ -37,7 +37,7 @@ def load_audio(name):
 
 
 BACKGROUNDS = pygame.sprite.Group()
-a = Background(load_image("test_arena.png"))
+background = Background(load_image("dungeon_bg.png"))
 
 
 class Icon(pygame.sprite.Sprite):
@@ -63,17 +63,17 @@ class CharacterIcon:
 
     def draw_mp_bar(self, screen, x, y, width, height, cur_mana, mana):
         name = pygame.font.Font(load_font("UbuntuSans-SemiBold.ttf"), 22)
-        screen.blit(name.render(f"{get_string("mp")}: {cur_mana}/{mana}", True, "purple"), (x, y - 28))
+        screen.blit(name.render(f"{get_string("mp")}: {cur_mana}/{mana}", True, "white"), (x, y - 28))
 
         pygame.draw.rect(screen, "black", (x + 2, y + 2, width, height))
         pygame.draw.rect(screen, "gray", (x, y, width, height))
-        pygame.draw.rect(screen, "purple", (x, y, cur_mana / mana * width, height))
+        pygame.draw.rect(screen, "white", (x, y, cur_mana / mana * width, height))
         pygame.draw.rect(screen, "black", (x, y, width, height), 2)
 
 
 CHARACTERS_PORTRAITS = {
     "Knight": CharacterIcon("knight_portrait.png"),
-    "Dummy1": CharacterIcon("dummy_portrait.png"),
+    "Kunoichi": CharacterIcon("kunoichi_portrait.png"),
     "Dummy2": CharacterIcon("dummy_portrait.png"),
     "Dummy3": CharacterIcon("dummy_portrait.png")
 }

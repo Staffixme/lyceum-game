@@ -19,7 +19,13 @@ STRINGS = {
     "select": ("Select", "Выбрать"),
     "back": ("Back", "Назад"),
     "hp": ("HP", "ОЗ"),
-    "mp": ("MP", "ОД")
+    "mp": ("MP", "ОД"),
+    "recover": ("Recover", "Восстановление"),
+    "recover_desc": ("Recover a large amount of HP to one ally", "Восстанавливает большое количество ОЗ одному союзнику"),
+    "absolute_heal": ("Absolute heal", "Абсолютное исцеление"),
+    "absolute_heal_desc": ("Recover a large amount of HP to one ally", "Восстанавливает огромное количество ОЗ всей команде"),
+    "Magma": ("Magma", "Магма"),
+    "Slime": ("Slime", "Слизь"),
 }
 
 game_language = 1

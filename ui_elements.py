@@ -3,6 +3,7 @@ import os
 import sys
 import math
 
+import save_data
 from game_resources import load_image, load_font
 from save_data import Data
 from translatable_text import get_string
@@ -118,10 +119,13 @@ class BattleButton(Button):
 
 
 def show_enemy_name(name):
-    surface = pygame.surface.Surface((1920, 1080), pygame.SRCALPHA, 32)
-    bubble = pygame.draw.rect(surface, "#EEEEEE", (surface.width - 324, 24, 300, 64), 0, 25)
+    surface = pygame.surface.Surface(save_data.Data.get_screen_size(), pygame.SRCALPHA, 32)
+    bubble_surface = pygame.surface.Surface((450, 150), pygame.SRCALPHA, 32)
+    pygame.draw.rect(bubble_surface, "#EEEEEE", (0, 0, 450, 150))
+    bubble_surface = pygame.transform.rotate(bubble_surface, -25)
+    surface.blit(bubble_surface, (surface.width - 390, -150))
     name_text = pygame.font.Font(load_font("UbuntuSans-SemiBold.ttf"), 32)
-    surface.blit(name_text.render(name, True, "black"), (bubble.x + 11, bubble.y + 11))
+    surface.blit(name_text.render(name, True, "black"), (surface.width - 150, 32))
     return surface
 
 
@@ -156,7 +160,7 @@ def draw_battle_buttons(group, battle_icons):
     radius = 150
     center_x, center_y = 300, Data.get_screen_size()[1] - 350
     tooltip = pygame.font.Font(load_font("UbuntuSans-SemiBold.ttf"), 28)
-    surface.blit(tooltip.render(group.cur_button.text, True, "black"),
+    surface.blit(tooltip.render(group.cur_button.text, True, "white"),
                  (group.cur_button.icon.rect.x + 52, group.cur_button.icon.rect.y + 92))
 
     for i in range(len(group.buttons)):

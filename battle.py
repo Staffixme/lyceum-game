@@ -15,10 +15,13 @@ from dialogue_system import show_dialogue
 from translatable_text import get_string
 from input_manager import InputManager
 
+from PIL import Image, ImageFilter
+
 
 class BattleState(State):
     def __init__(self, enemy_group):
         super().__init__()
+        self.is_win = False
         self.input_layout = "battle"
         InputManager.change_layout(self.input_layout)
 
@@ -66,8 +69,8 @@ class BattleState(State):
         self.player_point.image = load_image("player_point.png")
         self.player_point.rect = self.player_point.image.get_rect()
 
-        start_x = 425
-        start_y = 375
+        start_x = 500
+        start_y = 250
         distance = 92
         for i in range(len(self.player_party)):
             self.group.add(self.player_party[i].sprites)
@@ -246,7 +249,7 @@ class BattleState(State):
             if not i.is_alive:
                 alive_count += 1
         if alive_count == len(self.enemy_party):
-            StateManager.change_state(BattleFinishState("win"))
+            self.is_win = True
             return True
         return False
 
@@ -283,7 +286,7 @@ class BattleState(State):
         BACKGROUNDS.draw(surface)
         if isinstance(self.move_order[self.move_index], items.Hero):
             self.player_point.rect = self.move_order[self.move_index].sprites.rect
-            self.player_point.rect = self.player_point.rect.move(0, 58)
+            self.player_point.rect = self.player_point.rect.move(0, 128)
 
         if self.crosschair_mode == "enemy":
             self.crosschair.rect = self.enemy_party[self.selected_enemy_index].sprites.rect
@@ -300,7 +303,7 @@ class BattleState(State):
         screen.blit(draw_portraits(self.player_party), (0, 0))
 
         for i in self.player_party:
-            if i.is_protected:
+            if i.is_protected and i.is_alive:
                 draw_shield(i.sprites.rect.x + 112, i.sprites.rect.y + 28, screen)
 
         if not self.check_animation():
@@ -317,27 +320,41 @@ class BattleState(State):
                                        self.items_group)[0], (0, 0))
             screen.blit(draw_battle_ui(self.current_ui, self.button_group, self.battle_icons, self.skill_group,
                                        self.items_group)[1], (0, 0))
+        if self.is_win:
+            current_screen = pygame.image.tobytes(screen, "RGB")
+            background = Image.frombytes("RGB", Data.get_screen_size(), current_screen)
+            background = background.filter(ImageFilter.GaussianBlur(24))
+            background = background.tobytes()
+            background = pygame.image.frombytes(background, Data.get_screen_size(), "RGB")
+            StateManager.change_state(BattleFinishState("win", background))
 
         # screen.blit(show_dialogue(get_string("dialogue_ex"), get_string("dummy")))
 
 
 class BattleFinishState(State):
-    def __init__(self, end_type: str):
+    def __init__(self, end_type: str, background=None):
         super().__init__()
         MusicManager.play_music("battle_end_music.mp3", True)
         if end_type == "win":
-            self.title = "Победа"
-            self.color = "blue"
+            self.title = "ПОБЕДА!"
+            self.fill_mode = "image"
+            sprite = pygame.sprite.Sprite()
+            sprite.image = background
+            sprite.rect = sprite.image.get_rect()
+            self.group = pygame.sprite.Group(sprite)
         else:
-            self.title = "Побег"
-            self.color = "gray"
+            self.title = "ПОБЕГ"
+            self.fill_mode = "color"
 
     def draw(self, screen):
-        screen.fill(self.color)
-        win_text = pygame.font.Font(load_font("UbuntuSans-SemiBold.ttf"), 62)
+        if self.fill_mode == "image":
+            self.group.draw(screen)
+        else:
+            screen.fill("gray")
+        win_text = pygame.font.Font(load_font("Unbounded-Black.ttf"), 128)
         screen.blit(
             win_text.render(self.title, True, "white"),
-            (42, 42))
+            (Data.get_screen_size()[0] - win_text.size(self.title)[0] - 42, Data.get_screen_size()[1] / 2 - win_text.size(self.title)[1] - 64))
 
 
 class GameOverState(State):

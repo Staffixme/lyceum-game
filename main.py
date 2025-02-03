@@ -40,8 +40,8 @@ class MainMenu(State):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             match event.ui_element:
                 case self.new_game_btn:
-                    StateManager.change_state(BattleState([items.create_enemy("Dummy3"), items.create_enemy("Dummy4"),
-                                                            items.create_enemy("Dummy5"), items.create_enemy("Dummy3")]))
+                    StateManager.change_state(BattleState([items.create_enemy("Magma"), items.create_enemy("Slime"),
+                                                            items.create_enemy("Dummy5"), items.create_enemy("Magma")]))
                 case self.quit_btn:
                     sys.exit()
 
@@ -56,10 +56,11 @@ class Game:
     def __init__(self):
         pygame.init()
         self.is_fullscreen = True
-        current_data.player_group.append(items.CHARACTERS["Dummy"])
-        current_data.player_group.append(items.CHARACTERS["Dummy1"])
-        current_data.player_group.append(items.CHARACTERS["Dummy2"])
-        current_data.set_leader(items.CHARACTERS["Dummy"])
+        current_data.player_group.append(items.CHARACTERS["Samurai"])
+        current_data.player_group.append(items.CHARACTERS["Kunoichi"])
+        current_data.player_group.append(items.CHARACTERS["Archer"])
+        current_data.player_group.append(items.CHARACTERS["Wizard"])
+        current_data.set_leader(items.CHARACTERS["Samurai"])
         current_data.add_item(items.ITEMS["Aid"])
         current_data.add_item(items.ITEMS["Aid"])
         current_data.add_item(items.ITEMS["Aid_kit"])
@@ -77,7 +78,7 @@ class Game:
         running = True
 
         while running:
-            time_delta = self.clock.tick(144)
+            time_delta = self.clock.tick(60)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
