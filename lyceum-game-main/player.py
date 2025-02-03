@@ -1,6 +1,6 @@
 from settings import *
 from map import world_map, event_map
-from global_events import *
+import global_events
 
 import pygame
 import math
@@ -30,16 +30,15 @@ class Player:
 
         keys = pygame.key.get_pressed()
 
-
-        if pygame.time.get_ticks() - self.last_time > 550 and player_status == 'walk':
+        if pygame.time.get_ticks() - self.last_time > 550 and global_events.player_status == 'walk':
             if keys[pygame.K_w]:
                 pos = [self.position[0] + TILE * cos_a, self.position[1] + TILE * sin_a]
                 if not check_wall(world_map, pos):
                     self.position = pos
                     self.correction_move()
                 if check_attack(event_map, pos):
-                    player_status = 'attack'
-                    attack_enemy()
+                    global_events.player_status = 'attack'
+                    global_events.attack_enemy()
             if keys[pygame.K_s]:
                 self.rotate += 1.58 * 2
                 self.rotate %= 6.320001
