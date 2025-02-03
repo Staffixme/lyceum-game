@@ -345,14 +345,14 @@ class BattleFinishState(State):
         else:
             self.title = "ПОБЕГ"
             self.fill_mode = "color"
+
         self.hero = pygame.sprite.Sprite()
-        self.hero.image = background
+        self.frames = self.cut_sheet(load_image("Run.png"), 8)
+        self.hero.image = self.frames[0]
         self.hero.rect = self.hero.image.get_rect()
         self.hero_group = pygame.sprite.Group(self.hero)
         # self.hero.rect.move_ip(0, 500)
         self.hero_animation_index = 0
-
-        self.frames = self.cut_sheet(load_image("Run.png"), 8)
 
         self.current_time = 0
         self.last_update = pygame.time.get_ticks()
@@ -389,7 +389,7 @@ class BattleFinishState(State):
         win_text = pygame.font.Font(load_font("Unbounded-Black.ttf"), 128)
         screen.blit(
             win_text.render(self.title, True, "white"),
-            (Data.get_screen_size()[0] - win_text.size(self.title)[0] - 42,
+            (Data.get_screen_size()[0] - win_text.size(self.title)[0] - 90,
              Data.get_screen_size()[1] / 2 - win_text.size(self.title)[1] - 64))
         self.run_animation(screen)
         screen.blit(draw_buttons(Hint(get_string("continue"), "Space")), (0, 0))

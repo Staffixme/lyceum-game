@@ -10,11 +10,14 @@ from state import StateManager, State
 from translatable_text import get_string
 import pygame_gui
 from input_manager import InputManager, MENU_LAYOUT
+from main_movement import DungeonState
+import settings
 
 
 class MainMenu(State):
-    def __init__(self):
+    def __init__(self, screen):
         super().__init__()
+        self.screen = screen
         self.input_layout = "menu"
         InputManager.change_layout(self.input_layout)
         self.screen = Data.get_screen_size()
@@ -40,8 +43,7 @@ class MainMenu(State):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             match event.ui_element:
                 case self.new_game_btn:
-                    StateManager.change_state(BattleState([items.create_enemy("Magma"), items.create_enemy("Slime"),
-                                                            items.create_enemy("Dummy5"), items.create_enemy("Magma")]))
+                    StateManager.change_state(DungeonState(self.screen))
                 case self.quit_btn:
                     sys.exit()
 
@@ -67,10 +69,13 @@ class Game:
         current_data.add_item(items.ITEMS["Imba"])
         set_images(current_data.player_group)
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        #self.screen = pygame.display.set_mode((700, 300))
         current_data.set_screen_size(self.screen.size)
+        settings.set_wh(*Data.get_screen_size())
+        print(settings.WIDTH)
 
         self.clock = pygame.time.Clock()
-        StateManager.change_state(MainMenu())
+        StateManager.change_state(MainMenu(self.screen))
         self.game()
 
     def game(self):
