@@ -5,7 +5,7 @@ import pygame_gui
 
 from save_data import Data, current_data
 from ui_elements import (PLAYERS_ICONS, show_enemy_name, draw_portraits, draw_battle_ui, BattleButton, Icon,
-                         ButtonGroup, ItemButton, draw_hp, draw_mp, draw_shield)
+                         ButtonGroup, ItemButton, draw_hp, draw_mp, draw_shield, draw_buttons, Hint)
 from game_resources import BACKGROUNDS, load_image, load_font
 from music_manager import MusicManager
 
@@ -345,6 +345,41 @@ class BattleFinishState(State):
         else:
             self.title = "ПОБЕГ"
             self.fill_mode = "color"
+        self.hero = pygame.sprite.Sprite()
+        self.hero.image = background
+        self.hero.rect = self.hero.image.get_rect()
+        self.hero_group = pygame.sprite.Group(self.hero)
+        # self.hero.rect.move_ip(0, 500)
+        self.hero_animation_index = 0
+
+        self.frames = self.cut_sheet(load_image("Run.png"), 8)
+
+        self.current_time = 0
+        self.last_update = pygame.time.get_ticks()
+        self.frame_delay = 90
+
+    def cut_sheet(self, sprite, count):
+        frames = list()
+        self.hero.rect = pygame.Rect(0, 0, sprite.get_width() // count, sprite.get_height())
+        for i in range(count):
+            frame_location = (self.hero.rect.w * i, 0)
+            frame = sprite.subsurface(pygame.Rect(frame_location, self.hero.rect.size))
+            frame = pygame.transform.scale(frame, (512, 512))
+            frames.append(frame)
+
+        return frames
+
+    def run_animation(self, screen):
+        self.current_time = pygame.time.get_ticks()
+        if self.current_time - self.last_update > self.frame_delay:
+            self.hero_animation_index = (self.hero_animation_index + 1) % len(self.frames)
+            self.last_update = self.current_time
+            if self.hero.rect.x < 256:
+                self.hero.rect.move_ip(10, 0)
+
+        self.hero.image = self.frames[self.hero_animation_index]
+
+        self.hero_group.draw(screen)
 
     def draw(self, screen):
         if self.fill_mode == "image":
@@ -354,7 +389,10 @@ class BattleFinishState(State):
         win_text = pygame.font.Font(load_font("Unbounded-Black.ttf"), 128)
         screen.blit(
             win_text.render(self.title, True, "white"),
-            (Data.get_screen_size()[0] - win_text.size(self.title)[0] - 42, Data.get_screen_size()[1] / 2 - win_text.size(self.title)[1] - 64))
+            (Data.get_screen_size()[0] - win_text.size(self.title)[0] - 42,
+             Data.get_screen_size()[1] / 2 - win_text.size(self.title)[1] - 64))
+        self.run_animation(screen)
+        screen.blit(draw_buttons(Hint(get_string("continue"), "Space")), (0, 0))
 
 
 class GameOverState(State):

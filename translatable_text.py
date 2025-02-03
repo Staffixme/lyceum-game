@@ -17,6 +17,7 @@ STRINGS = {
     "action_selection": ("Action selection", "Выбор действия"),
     "navigation": ("Navigation", "Навигация"),
     "select": ("Select", "Выбрать"),
+    "continue": ("Continue", "Продолжить"),
     "back": ("Back", "Назад"),
     "hp": ("HP", "ОЗ"),
     "mp": ("MP", "ОД"),
