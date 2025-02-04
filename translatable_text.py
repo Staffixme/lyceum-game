@@ -3,6 +3,8 @@ STRINGS = {
     "dialogue_ex": ("This is dialogue example.", "Это пример диалога."),
     "new_game": ("New game", "Новая игра"),
     "load": ("Load game", "Загрузить"),
+    "save": ("Save", "Сохранение"),
+    "menu": ("Menu", "Меню"),
     "settings": ("Settings", "Настройки"),
     "quit": ("Quit", "Выйти"),
     "attack": ("Melee", "Ближний бой"),
@@ -36,4 +38,5 @@ def get_string(key: str) -> str:
     result = STRINGS.get(key, "Missing text asset")
     if isinstance(result, tuple):
         return result[game_language]
-    return result
+    else:
+        return result

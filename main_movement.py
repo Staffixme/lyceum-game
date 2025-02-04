@@ -5,18 +5,20 @@ import math
 from map import world_map
 from drawing import Drawing
 from state import State
-from ui_elements import draw_portraits
+from ui_elements import draw_portraits, draw_buttons, Hint
 from save_data import current_data
+from translatable_text import get_string
+from music_manager import MusicManager
 
 
 class DungeonState(State):
-    def __init__(self, screen):
+    def __init__(self):
         super().__init__()
         # sc = pygame.display.set_mode((WIDTH, HEIGHT))
-        sc_map = pygame.Surface((screen[0] // MAP_SCALE, screen[1] // MAP_SCALE))
+        MusicManager.play_music("schooldays.mp3", True)
         self.clock = pygame.time.Clock()
         self.player = Player()
-        self.drawing = Drawing(sc_map)
+        self.drawing = Drawing()
         self.player_party = current_data.player_group
 
     def draw(self, screen):
@@ -25,5 +27,6 @@ class DungeonState(State):
 
         self.drawing.background(screen, self.player.angle)
         self.drawing.world(screen, self.player.pos, self.player.angle)
-        self.drawing.mini_map(screen, self.player)
+        screen.blit(self.drawing.mini_map(self.player), (32, 52))
         screen.blit(draw_portraits(self.player_party), (0, 0))
+        screen.blit(draw_buttons(Hint("menu", "Tab"), Hint("save", "H")), (0, 0))

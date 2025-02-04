@@ -2,7 +2,6 @@ import sys
 
 import pygame
 from ui_elements import PLAYERS_ICONS, set_images, draw_buttons, Hint
-from battle import BattleState
 from save_data import current_data, Data
 import items
 import dialogue_system
@@ -43,17 +42,17 @@ class MainMenu(State):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             match event.ui_element:
                 case self.new_game_btn:
-                    StateManager.change_state(DungeonState(self.screen))
+                    StateManager.change_state(DungeonState())
                 case self.quit_btn:
                     sys.exit()
 
     def draw(self, screen: pygame.Surface):
         screen.fill("blue")
-        screen.blit(draw_buttons(Hint(get_string("navigation"), "W", "S"),
-                    Hint(get_string("navigation"), "Space")))
+        screen.blit(draw_buttons(Hint("navigation", "W", "S"),
+                    Hint("navigation", "Space")))
         self.manager.draw_ui(screen)
 
-
+ 
 class Game:
     def __init__(self):
         pygame.init()

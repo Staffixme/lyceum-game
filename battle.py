@@ -14,6 +14,7 @@ from state import State, StateManager
 from dialogue_system import show_dialogue
 from translatable_text import get_string
 from input_manager import InputManager
+from main_movement import DungeonState
 
 from PIL import Image, ImageFilter
 
@@ -334,6 +335,7 @@ class BattleState(State):
 class BattleFinishState(State):
     def __init__(self, end_type: str, background=None):
         super().__init__()
+        InputManager.change_layout("ui")
         MusicManager.play_music("battle_end_music.mp3", True)
         if end_type == "win":
             self.title = "ПОБЕДА!"
@@ -369,6 +371,13 @@ class BattleFinishState(State):
 
         return frames
 
+    def update(self, event):
+        if event.type == pygame.KEYDOWN:
+            if InputManager.current_key in InputManager.current_input:
+                match InputManager.current_input[InputManager.current_key]:
+                    case "Confirm":
+                        StateManager.change_state(DungeonState())
+
     def run_animation(self, screen):
         self.current_time = pygame.time.get_ticks()
         if self.current_time - self.last_update > self.frame_delay:
@@ -392,7 +401,7 @@ class BattleFinishState(State):
             (Data.get_screen_size()[0] - win_text.size(self.title)[0] - 90,
              Data.get_screen_size()[1] / 2 - win_text.size(self.title)[1] - 64))
         self.run_animation(screen)
-        screen.blit(draw_buttons(Hint(get_string("continue"), "Space")), (0, 0))
+        screen.blit(draw_buttons(Hint("continue", "Space")), (0, 0))
 
 
 class GameOverState(State):

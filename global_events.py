@@ -1,7 +1,7 @@
 import pygame.display
 
 from state import StateManager, State
-from battle import BattleState
+
 import items
 from PIL import Image, ImageFilter, ImageEnhance
 from music_manager import MusicManager
@@ -43,6 +43,7 @@ class DungeonToBattleState(State):
             img = pygame.image.frombytes(img, self.screenshot.get_size(), "RGB")
             screen.blit(img, (0, 0))
         elif self.step > 25:
+            from battle import BattleState
             StateManager.change_state(BattleState(self.enemy_party))
 
         if self.current_time - self.last_update > self.frame_delay:
