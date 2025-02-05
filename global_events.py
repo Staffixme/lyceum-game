@@ -45,6 +45,8 @@ class DungeonToBattleState(State):
         elif self.step > 25:
             from battle import BattleState
             StateManager.change_state(BattleState(self.enemy_party))
+            global player_status
+            player_status = "walk"
 
         if self.current_time - self.last_update > self.frame_delay:
             self.step += 1

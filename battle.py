@@ -70,11 +70,12 @@ class BattleState(State):
         self.player_point.image = load_image("player_point.png")
         self.player_point.rect = self.player_point.image.get_rect()
 
-        start_x = 500
-        start_y = 250
+        start_x = Data.get_screen_size()[0] // 4
+        start_y = Data.get_screen_size()[1] // 4
         distance = 92
         for i in range(len(self.player_party)):
             self.group.add(self.player_party[i].sprites)
+            self.player_party[i].sprites.change_animation("idle")
             self.player_party[i].sprites.rect.move_ip(start_x + i * distance, start_y + i * distance)
 
         start_x = 912
@@ -327,6 +328,14 @@ class BattleState(State):
             background = background.filter(ImageFilter.GaussianBlur(24))
             background = background.tobytes()
             background = pygame.image.frombytes(background, Data.get_screen_size(), "RGB")
+            start_x = Data.get_screen_size()[0] // 4
+            start_y = Data.get_screen_size()[1] // 4
+            distance = 92
+            for i in range(len(self.player_party)):
+                self.player_party[i].sprites.rect.move_ip(-start_x - i * distance, -start_y - i * distance)
+                if not self.player_party[i].is_alive:
+                    self.player_party[i].heal(1)
+                    self.player_party[i].is_alive = True
             StateManager.change_state(BattleFinishState("win", background))
 
         # screen.blit(show_dialogue(get_string("dialogue_ex"), get_string("dummy")))

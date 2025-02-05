@@ -218,13 +218,14 @@ class HealItem(Item):
         self.is_group_use = is_group_use
 
     def use(self, target: Character | tuple):
-        if not self.is_group_use:
-            target.heal(self.value)
-        elif self.is_group_use:
-            for i in target[0]:
-                if i.is_alive:
-                    i.heal(self.value)
-        self.count -= 1
+        if self.count > 0 and (target.cur_health != target.health or isinstance(target, tuple)):
+            if not self.is_group_use:
+                target.heal(self.value)
+            elif self.is_group_use:
+                for i in target[0]:
+                    if i.is_alive:
+                        i.heal(self.value)
+            self.count -= 1
 
     def __copy__(self):
         return HealItem(self.name, self.description, self.value, self.is_group_use)
@@ -276,7 +277,7 @@ WEAPONS = {
 }
 
 CHARACTERS = {
-    "Samurai": Hero(get_string("dummy"), 375, 110, WEAPONS["Katana"],
+    "Samurai": Hero(get_string("Samurai"), 375, 110, WEAPONS["Katana"],
                   (SKILLS["Test_skill"], SKILLS["Test_skill_group"], SKILLS["Heal_skill"]),
                   None,
                   ((load_image("samurai_idle.png"), 5),
@@ -285,7 +286,7 @@ CHARACTERS = {
                    (load_image("samurai_cast.png"), 7),
                    (load_image("samurai_death.png"), 6)),
                   CHARACTERS_PORTRAITS["Knight"]),
-    "Archer": Hero(get_string("dummy"), 312, 90, WEAPONS["Enemy_wp"], (SKILLS["Test_skill"], SKILLS["Heal_skill"]),
+    "Archer": Hero(get_string("Archer"), 312, 90, WEAPONS["Enemy_wp"], (SKILLS["Test_skill"], SKILLS["Heal_skill"]),
                    None,
                    ((load_image("archer_idle.png"), 9),
                     (load_image("archer_attack.png"), 14),
@@ -293,14 +294,14 @@ CHARACTERS = {
                     (load_image("archer_cast.png"), 9),
                     (load_image("archer_death.png"), 5)),
                    CHARACTERS_PORTRAITS["Dummy2"]),
-    "Kunoichi": Hero(get_string("dummy"), 275, 75, WEAPONS["Katana"], (SKILLS["Recover"], SKILLS["Absolute_heal"]), None,
+    "Kunoichi": Hero(get_string("Kunoichi"), 275, 75, WEAPONS["Katana"], (SKILLS["Recover"], SKILLS["Absolute_heal"]), None,
                    ((load_image("kunoichi_idle.png"), 9),
                     (load_image("kunoichi_attack.png"), 8),
                     (load_image("kunoichi_defend.png"), 9),
                     (load_image("kunoichi_cast.png"), 6),
                     (load_image("kunoichi_death.png"), 5)),
                    CHARACTERS_PORTRAITS["Kunoichi"]),
-    "Wizard": Hero(get_string("dummy"), 250, 100, WEAPONS["Katana"], (SKILLS["Heal_skill"],), None,
+    "Wizard": Hero(get_string("Wizard"), 250, 100, WEAPONS["Katana"], (SKILLS["Heal_skill"],), None,
                    ((load_image("wizard_idle.png"), 7),
                     (load_image("wizard_attack.png"), 4),
                     (load_image("wizard_defend.png"), 3),

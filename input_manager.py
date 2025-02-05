@@ -13,9 +13,20 @@ BATTLE_LAYOUT = {
     pygame.K_ESCAPE: "Back",
 }
 
+MOVEMENT_LAYOUT = {
+    pygame.K_w: "Forward",
+    pygame.K_a: "Left",
+    pygame.K_d: "Right",
+    pygame.K_s: "Back",
+    pygame.K_h: "Save",
+    pygame.K_TAB: "Menu",
+}
+
 UI_LAYOUT = {
     pygame.K_w: "Up",
     pygame.K_s: "Down",
+    pygame.K_a: "Left",
+    pygame.K_d: "Right",
     pygame.K_SPACE: "Confirm",
     pygame.K_KP_ENTER: "Confirm",
     pygame.K_ESCAPE: "Back"
@@ -25,6 +36,7 @@ INPUT_LAYOUTS = {
     "menu": MENU_LAYOUT,
     "battle": BATTLE_LAYOUT,
     "ui": UI_LAYOUT,
+    "movement": MOVEMENT_LAYOUT
 }
 
 

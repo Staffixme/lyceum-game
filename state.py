@@ -1,3 +1,6 @@
+from sys import getrefcount
+
+
 class StateManager:
     current_state = None
 
@@ -5,7 +8,10 @@ class StateManager:
     def change_state(new_state):
         if StateManager.current_state is not None:
             StateManager.current_state.exit()
+        # del StateManager.current_state
+        print(1, getrefcount(StateManager.current_state))
         StateManager.current_state = new_state
+        print(2, getrefcount(StateManager.current_state))
 
     @staticmethod
     def update(event):

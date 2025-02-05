@@ -35,6 +35,8 @@ class ButtonGroup:
             self.cur_index = 0
             self.cur_button = self.buttons[self.cur_index]
             self.cur_button.set_active()
+        else:
+            self.buttons = list()
 
     def next_button(self):
         self.cur_button.set_inactive()
@@ -53,6 +55,20 @@ class ButtonGroup:
         self.cur_index = 0
         self.cur_button = self.buttons[self.cur_index]
         self.cur_button.set_active()
+
+
+class ListButton(Button):
+    def __init__(self, text: str, size=64):
+        super().__init__()
+        self.text = text
+        self.size = size
+        self.opacity = 128
+
+    def set_active(self):
+        self.opacity = 255
+
+    def set_inactive(self):
+        self.opacity = 128
 
 
 class ItemButton(Button):
@@ -276,6 +292,15 @@ def draw_buttons(*buttons):
     return surface
 
 
+def draw_list_buttons(group, screen, start_x, start_y, distance=92):
+    for i in range(len(group.buttons)):
+        button_text = pygame.font.Font(load_font("UbuntuSans-SemiBold.ttf"), group.buttons[i].size)
+        button = button_text.render(group.buttons[i].text, True, "white")
+        button.set_alpha(group.buttons[i].opacity)
+
+        screen.blit(button, (start_x, start_y + distance * i))
+
+
 def draw_battle_ui(current_ui, group, battle_icons, skill_group, item_group):
     match current_ui:
         case "buttons":
@@ -300,3 +325,54 @@ def draw_shield(x, y, screen):
     shield_group.add(icon)
     shield_group.draw(screen)
 
+
+def draw_blue_rect(screen):
+    rect = (0, 0, 800, screen.size[1])
+    surface = pygame.surface.Surface((800, screen.size[1]), pygame.SRCALPHA, 32)
+    pygame.draw.rect(surface, "#2B53AA", rect)
+    surface = pygame.transform.rotate(surface, 125)
+
+    screen.blit(surface, (screen.size[0] - screen.size[0] // 2 + 128, 485))
+
+
+def draw_item_info_rect(screen, item_name, item_desc, cnt, character):
+    rect = (screen.size[0] - screen.size[0] // 3 - 64, 0, 800, screen.size[1])
+    surface = pygame.surface.Surface((800, screen.size[1]), pygame.SRCALPHA, 32)
+    name = pygame.font.Font(load_font("UbuntuSans-SemiBold.ttf"), 42)
+    name_render = name.render(item_name, True, "white")
+    count = pygame.font.Font(load_font("UbuntuSans-Regular.ttf"), 24)
+    count_render = count.render(f"{get_string("you_have")}: {cnt}", True, "white")
+    desc = pygame.font.Font(load_font("UbuntuSans-Regular.ttf"), 32)
+    character_font = pygame.font.Font(load_font("UbuntuSans-Regular.ttf"), 32)
+    character_render = character_font.render(f"{get_string("selected_ally")}:\n{character}", True,
+                                             "white")
+
+    desc_surface = pygame.surface.Surface((screen.size[0] // 4, screen.size[0] // 2), pygame.SRCALPHA, 32)
+    words = [word.split(' ') for word in item_desc.splitlines()]  # 2D array where each row is a list of words.
+    space = desc.size(' ')[0] + 5  # The width of a space.
+    max_width, max_height = screen.size[0] // 4, screen.size[0] // 2
+    x, y = 0, 0
+    for line in words:
+        for word in line:
+            word_surface = desc.render(word, True, "white")
+            word_width, word_height = word_surface.get_size()
+            if x + word_width >= max_width - 32:
+                x = 0  # Reset the x.
+                y += word_height + 5  # Start on new row.
+            desc_surface.blit(word_surface, (x, y))
+            x += word_width + space
+        x = 0  # Reset the x.
+        y += word_height
+
+    pygame.draw.rect(screen, "#2B53AA", rect)
+    screen.blit(name_render, (screen.size[0] - screen.size[0] // 3 - 32, 42))
+    screen.blit(count_render, (screen.size[0] - screen.size[0] // 3 - 32, 100))
+    screen.blit(desc_surface, (screen.size[0] - screen.size[0] // 3 - 32, 152))
+    screen.blit(character_render, (screen.size[0] - screen.size[0] // 3 - 32, screen.size[1] - 400))
+
+
+def print_stage(stage_num):
+    button_text = pygame.font.Font(load_font("UbuntuSans-SemiBold.ttf"), 32)
+    text = button_text.render(f"{get_string("stage")}: {stage_num}", True, "white")
+
+    return text

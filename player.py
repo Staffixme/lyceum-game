@@ -4,6 +4,7 @@ import global_events
 
 import pygame
 import math
+from input_manager import InputManager
 
 
 class Player:
@@ -31,29 +32,31 @@ class Player:
         keys = pygame.key.get_pressed()
 
         if pygame.time.get_ticks() - self.last_time > 550 and global_events.player_status == 'walk':
-            if keys[pygame.K_w]:
-                pos = [self.position[0] + TILE * cos_a, self.position[1] + TILE * sin_a]
-                if not check_wall(world_map, pos):
-                    self.position = pos
-                    self.correction_move()
-                if check_attack(event_map, pos):
-                    global_events.player_status = 'attack'
-                    global_events.attack_enemy()
-            if keys[pygame.K_s]:
-                self.rotate += 1.58 * 2
-                self.rotate %= 6.320001
-                self.rotate = round(self.rotate, 2)
-                self.correction_move()
-            if keys[pygame.K_a]:
-                self.rotate -= 1.58
-                self.rotate %= 6.320001
-                self.rotate = round(self.rotate, 2)
-                self.correction_move()
-            if keys[pygame.K_d]:
-                self.rotate += 1.58
-                self.rotate %= 6.320001
-                self.rotate = round(self.rotate, 2)
-                self.correction_move()
+            if InputManager.current_key in InputManager.current_input:
+                match InputManager.current_input[InputManager.current_key]:
+                    case "Forward":
+                        pos = [self.position[0] + TILE * cos_a, self.position[1] + TILE * sin_a]
+                        if not check_wall(world_map, pos):
+                            self.position = pos
+                            self.correction_move()
+                        if check_attack(event_map, pos):
+                            global_events.player_status = 'attack'
+                            global_events.attack_enemy()
+                    case "Back":
+                        self.rotate += 1.58 * 2
+                        self.rotate %= 6.320001
+                        self.rotate = round(self.rotate, 2)
+                        self.correction_move()
+                    case "Left":
+                        self.rotate -= 1.58
+                        self.rotate %= 6.320001
+                        self.rotate = round(self.rotate, 2)
+                        self.correction_move()
+                    case "Right":
+                        self.rotate += 1.58
+                        self.rotate %= 6.320001
+                        self.rotate = round(self.rotate, 2)
+                        self.correction_move()
 
         if self.angle < self.rotate:
             self.angle += self.delta_rotate / self.rotate_speed

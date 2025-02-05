@@ -1,7 +1,7 @@
 import sys
 
 import pygame
-from ui_elements import PLAYERS_ICONS, set_images, draw_buttons, Hint
+from ui_elements import PLAYERS_ICONS, set_images, draw_buttons, Hint, draw_list_buttons, ListButton, ButtonGroup
 from save_data import current_data, Data
 import items
 import dialogue_system
@@ -11,48 +11,53 @@ import pygame_gui
 from input_manager import InputManager, MENU_LAYOUT
 from main_movement import DungeonState
 import settings
+from game_resources import load_image
+from music_manager import MusicManager
 
 
 class MainMenu(State):
     def __init__(self, screen):
         super().__init__()
         self.screen = screen
-        self.input_layout = "menu"
+        self.input_layout = "ui"
+        self.button_group = ButtonGroup(ListButton(get_string("new_game")),
+                                        ListButton(get_string("load")),
+                                        ListButton(get_string("language")),
+                                        ListButton(get_string("quit")))
+
+        background = pygame.sprite.Sprite()
+        background.image = load_image("mainmenu_bg.png")
+        MusicManager.play_music("mainmenu_theme.mp3", True)
+        background.rect = background.image.get_rect()
+        self.group = pygame.sprite.Group(background)
         InputManager.change_layout(self.input_layout)
         self.screen = Data.get_screen_size()
-        self.manager = pygame_gui.UIManager((self.screen[0], self.screen[1]), "data/ui styles/main_menu.json")
-
-        self.new_game_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 0), (375, 64)),
-                                                         text=get_string("new_game"),
-                                                         manager=self.manager)
-        self.load_game_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 88), (375, 64)),
-                                                          text=get_string("load"),
-                                                          manager=self.manager)
-        self.settings_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 176), (375, 64)),
-                                                         text=get_string("settings"),
-                                                         manager=self.manager)
-        self.quit_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 264), (375, 64)),
-                                                     text=get_string("quit"),
-                                                     manager=self.manager)
 
     def update(self, event):
-        self.manager.process_events(event)
-        self.manager.update(60)
-
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            match event.ui_element:
-                case self.new_game_btn:
-                    StateManager.change_state(DungeonState())
-                case self.quit_btn:
-                    sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if InputManager.current_key in InputManager.current_input:
+                match InputManager.current_input[InputManager.current_key]:
+                    case "Confirm":
+                        if self.button_group.cur_index == 0:
+                            StateManager.change_state(DungeonState())
+                        elif self.button_group.cur_index == 1:
+                            StateManager.change_state(DungeonState())
+                        elif self.button_group.cur_index == 2:
+                            StateManager.change_state(DungeonState())
+                        elif self.button_group.cur_index == 3:
+                            sys.exit()
+                    case "Up":
+                        self.button_group.prev_button()
+                    case "Down":
+                        self.button_group.next_button()
 
     def draw(self, screen: pygame.Surface):
-        screen.fill("blue")
+        self.group.draw(screen)
         screen.blit(draw_buttons(Hint("navigation", "W", "S"),
-                    Hint("navigation", "Space")))
-        self.manager.draw_ui(screen)
+                                 Hint("select", "Space")))
+        draw_list_buttons(self.button_group, screen, 64, 64)
 
- 
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -68,10 +73,9 @@ class Game:
         current_data.add_item(items.ITEMS["Imba"])
         set_images(current_data.player_group)
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        #self.screen = pygame.display.set_mode((700, 300))
+        # self.screen = pygame.display.set_mode((700, 300))
         current_data.set_screen_size(self.screen.size)
         settings.set_wh(*Data.get_screen_size())
-        print(settings.WIDTH)
 
         self.clock = pygame.time.Clock()
         StateManager.change_state(MainMenu(self.screen))
