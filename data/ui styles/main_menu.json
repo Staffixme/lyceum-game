@@ -1,0 +1,27 @@
+{
+  "button":
+  {
+    "colours":{
+      "normal_bg": "#FFFFFF",
+      "hovered_bg": "#C3FF00",
+      "normal_text": "#000000",
+      "normal_border": "#FFFFFF",
+      "hovered_text": "#004766",
+      "hovered_border": "#C3FF00"
+    },
+    "misc": {
+      "shape": "rounded_rectangle",
+      "shape_corner_radius": "10"
+    },
+    "font": {
+      "name": "UbuntuSans",
+      "size": "24",
+      "regular_resource": {
+                  "package": "data.fonts",
+                  "resource": "UbuntuSans-SemiBold.ttf"
+             }
+    }
+  }
+
+
+}
