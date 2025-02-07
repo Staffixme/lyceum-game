@@ -4,7 +4,9 @@ STRINGS = {
     "new_game": ("New game", "Новая игра"),
     "load": ("Load game", "Загрузить"),
     "save": ("Save", "Сохранение"),
+    "empty_slot": ("No data", "Нет данных"),
     "menu": ("Menu", "Меню"),
+    "received": ("Received", "Получено"),
     "language": ("Переключиться на русский язык", "Switch to english"),
     "quit": ("Quit", "Выйти"),
     "to_menu": ("Back to title", "Выйти в гл. меню"),
@@ -36,7 +38,10 @@ STRINGS = {
     "Archer": ("Archer", "Лучник"),
     "Wizard": ("Wizard", "Маг"),
     "Magma": ("Magma", "Магма"),
-    "Slime": ("Slime", "Слизь"),
+    "katana": ("Katana", "Катана"),
+    "bow": ("Bow", "Лук"),
+    "chain": ("Chain", "Цепь"),
+    "knife": ("Knife", "Нож"),
 }
 
 game_language = 1

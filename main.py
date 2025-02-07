@@ -1,7 +1,8 @@
 import sys
 
 import pygame
-from ui_elements import PLAYERS_ICONS, set_images, draw_buttons, Hint, draw_list_buttons, ListButton, ButtonGroup
+from ui_elements import PLAYERS_ICONS, set_images, draw_buttons, Hint, draw_list_buttons, ListButton, ButtonGroup, \
+    GameSaveButton, draw_save_buttons
 from save_data import current_data, Data
 import items
 import dialogue_system
@@ -14,6 +15,8 @@ import settings
 from game_resources import load_image
 from music_manager import MusicManager
 
+from PIL import Image, ImageFilter
+
 
 class MainMenu(State):
     def __init__(self, screen):
@@ -25,6 +28,10 @@ class MainMenu(State):
                                         ListButton(get_string("language")),
                                         ListButton(get_string("quit")))
 
+        self.save_buttons_group = ButtonGroup(GameSaveButton(f"{get_string("save")} №1", Data.load_stage(1)),
+                                              GameSaveButton(f"{get_string("save")} №2", Data.load_stage(2)),
+                                              GameSaveButton(f"{get_string("save")} №3", Data.load_stage(3)))
+
         background = pygame.sprite.Sprite()
         background.image = load_image("mainmenu_bg.png")
         MusicManager.play_music("mainmenu_theme.mp3", True)
@@ -33,29 +40,67 @@ class MainMenu(State):
         InputManager.change_layout(self.input_layout)
         self.screen = Data.get_screen_size()
 
+        self.blurred_bg = pygame.sprite.Group()
+        self.mode = "menu"
+
     def update(self, event):
         if event.type == pygame.KEYDOWN:
             if InputManager.current_key in InputManager.current_input:
                 match InputManager.current_input[InputManager.current_key]:
                     case "Confirm":
-                        if self.button_group.cur_index == 0:
+                        if self.mode == "menu":
+                            if self.button_group.cur_index == 0:
+                                Data.new_game(current_data)
+                                StateManager.change_state(DungeonState())
+                            elif self.button_group.cur_index == 1:
+                                self.get_blurred_background()
+                                self.mode = "load"
+                            elif self.button_group.cur_index == 2:
+                                StateManager.change_state(DungeonState())
+                            elif self.button_group.cur_index == 3:
+                                sys.exit()
+                        elif self.mode == "load":
+                            Data.load_game(self.save_buttons_group.cur_index + 1, current_data)
                             StateManager.change_state(DungeonState())
-                        elif self.button_group.cur_index == 1:
-                            StateManager.change_state(DungeonState())
-                        elif self.button_group.cur_index == 2:
-                            StateManager.change_state(DungeonState())
-                        elif self.button_group.cur_index == 3:
-                            sys.exit()
                     case "Up":
-                        self.button_group.prev_button()
+                        if self.mode == "menu":
+                            self.button_group.prev_button()
+                        elif self.mode == "load":
+                            self.save_buttons_group.prev_button()
                     case "Down":
-                        self.button_group.next_button()
+                        if self.mode == "menu":
+                            self.button_group.next_button()
+                        elif self.mode == "load":
+                            self.save_buttons_group.next_button()
+                    case "Back":
+                        self.mode = "menu"
+
+    def get_blurred_background(self):
+        self.blurred_bg.empty()
+        screen = pygame.display.get_surface()
+        current_screen = pygame.image.tobytes(screen, "RGB")
+        background = Image.frombytes("RGB", Data.get_screen_size(), current_screen)
+        background = background.filter(ImageFilter.GaussianBlur(64))
+        background = background.tobytes()
+        background = pygame.image.frombytes(background, Data.get_screen_size(), "RGB")
+
+        ui_background = pygame.sprite.Sprite()
+        ui_background.image = background
+        ui_background.rect = ui_background.image.get_rect()
+        self.blurred_bg = pygame.sprite.Group(ui_background)
 
     def draw(self, screen: pygame.Surface):
-        self.group.draw(screen)
-        screen.blit(draw_buttons(Hint("navigation", "W", "S"),
-                                 Hint("select", "Space")))
-        draw_list_buttons(self.button_group, screen, 64, 64)
+        if self.mode == "menu":
+            self.group.draw(screen)
+            screen.blit(draw_buttons(Hint("navigation", "W", "S"),
+                                     Hint("select", "Space")))
+            draw_list_buttons(self.button_group, screen, 64, 64)
+        elif self.mode == "load":
+            self.blurred_bg.draw(screen)
+            draw_save_buttons(self.save_buttons_group, screen, screen.size[0] // 2 - 464, screen.size[1] // 5)
+            screen.blit(draw_buttons(Hint("back", "Esc"),
+                                     Hint("navigation", "W", "S"),
+                                     Hint("select", "Space")))
 
 
 class Game:
@@ -67,10 +112,10 @@ class Game:
         current_data.player_group.append(items.CHARACTERS["Archer"])
         current_data.player_group.append(items.CHARACTERS["Wizard"])
         current_data.set_leader(items.CHARACTERS["Samurai"])
-        current_data.add_item(items.ITEMS["Aid"])
-        current_data.add_item(items.ITEMS["Aid"])
-        current_data.add_item(items.ITEMS["Aid_kit"])
-        current_data.add_item(items.ITEMS["Imba"])
+        # current_data.add_item(items.ITEMS["Aid"])
+        # current_data.add_item(items.ITEMS["Aid"])
+        # current_data.add_item(items.ITEMS["Aid_kit"])
+        # current_data.add_item(items.ITEMS["Imba"])
         set_images(current_data.player_group)
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         # self.screen = pygame.display.set_mode((700, 300))

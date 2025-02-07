@@ -198,11 +198,11 @@ class Enemy(Character):
 
 
 class Item:
-    def __init__(self, name: str, description: str):
+    def __init__(self, name: str, description: str, item_id: int):
         self.name = name
+        self.item_id = item_id
         self.description = description
-        self.count = 0
-        self.count += 1
+        self.count = 1
 
     def use(self, target: Character | list):
         pass
@@ -212,8 +212,8 @@ class Item:
 
 
 class HealItem(Item):
-    def __init__(self, name: str, description: str, value: int, is_group_use: bool):
-        super().__init__(name, description)
+    def __init__(self, name: str, description: str, value: int, is_group_use: bool, item_id: int):
+        super().__init__(name, description, item_id)
         self.value = value
         self.is_group_use = is_group_use
 
@@ -232,8 +232,8 @@ class HealItem(Item):
 
 
 class AttackItem(Item):
-    def __init__(self, name: str, description: str, value: int, is_group_use: bool):
-        super().__init__(name, description)
+    def __init__(self, name: str, description: str, value: int, is_group_use: bool, item_id: int):
+        super().__init__(name, description, item_id)
         self.value = value
         self.is_group_use = is_group_use
 
@@ -266,14 +266,17 @@ SKILLS = {
 }
 
 ITEMS = {
-    "Aid": HealItem("Аптечка", "Исцеляет среднее количество ОЗ одному союзнику", 100, False),
-    "Aid_kit": HealItem("Набор первой помощи", "Исцеляет большое количество ОЗ всем союзникам", 500, True),
-    "Imba": AttackItem("Этот предмет просто имба", "Урон, мгновенно убивающий врага", 999999, False),
+    "Aid": HealItem("Аптечка", "Исцеляет среднее количество ОЗ одному союзнику", 100, False, 1),
+    "Aid_kit": HealItem("Набор первой помощи", "Исцеляет большое количество ОЗ всем союзникам", 500, True, 2),
+    "Imba": AttackItem("Этот предмет просто имба", "Урон, мгновенно убивающий врага", 999999, False, 3),
 }
 
 WEAPONS = {
-    "Katana": Melee("Катана", 100),
-    "Enemy_wp": Melee("Вражеское оружие", 30)
+    "Katana": Melee(get_string("katana"), 120),
+    "Enemy_wp": Melee("Вражеское оружие", 30),
+    "Bow": Melee(get_string("bow"), 82),
+    "Chain": Melee(get_string("chain"), 60),
+    "Knife": Melee(get_string("knife"), 50)
 }
 
 CHARACTERS = {
@@ -285,29 +288,29 @@ CHARACTERS = {
                    (load_image("samurai_defend.png"), 2),
                    (load_image("samurai_cast.png"), 7),
                    (load_image("samurai_death.png"), 6)),
-                  CHARACTERS_PORTRAITS["Knight"]),
-    "Archer": Hero(get_string("Archer"), 312, 90, WEAPONS["Enemy_wp"], (SKILLS["Test_skill"], SKILLS["Heal_skill"]),
+                  CHARACTERS_PORTRAITS["Samurai"]),
+    "Archer": Hero(get_string("Archer"), 312, 90, WEAPONS["Bow"], (SKILLS["Test_skill"], SKILLS["Heal_skill"]),
                    None,
                    ((load_image("archer_idle.png"), 9),
                     (load_image("archer_attack.png"), 14),
                     (load_image("archer_defend.png"), 3),
                     (load_image("archer_cast.png"), 9),
                     (load_image("archer_death.png"), 5)),
-                   CHARACTERS_PORTRAITS["Dummy2"]),
-    "Kunoichi": Hero(get_string("Kunoichi"), 275, 75, WEAPONS["Katana"], (SKILLS["Recover"], SKILLS["Absolute_heal"]), None,
+                   CHARACTERS_PORTRAITS["Archer"]),
+    "Kunoichi": Hero(get_string("Kunoichi"), 275, 75, WEAPONS["Chain"], (SKILLS["Recover"], SKILLS["Absolute_heal"]), None,
                    ((load_image("kunoichi_idle.png"), 9),
                     (load_image("kunoichi_attack.png"), 8),
                     (load_image("kunoichi_defend.png"), 9),
                     (load_image("kunoichi_cast.png"), 6),
                     (load_image("kunoichi_death.png"), 5)),
                    CHARACTERS_PORTRAITS["Kunoichi"]),
-    "Wizard": Hero(get_string("Wizard"), 250, 100, WEAPONS["Katana"], (SKILLS["Heal_skill"],), None,
+    "Wizard": Hero(get_string("Wizard"), 250, 100, WEAPONS["Knife"], (SKILLS["Heal_skill"],), None,
                    ((load_image("wizard_idle.png"), 7),
                     (load_image("wizard_attack.png"), 4),
                     (load_image("wizard_defend.png"), 3),
                     (load_image("wizard_cast.png"), 8),
                     (load_image("wizard_death.png"), 6)),
-                   CHARACTERS_PORTRAITS["Dummy3"]),
+                   CHARACTERS_PORTRAITS["Wizard"]),
 
 }
 

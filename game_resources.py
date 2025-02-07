@@ -72,8 +72,8 @@ class CharacterIcon:
 
 
 CHARACTERS_PORTRAITS = {
-    "Knight": CharacterIcon("knight_portrait.png"),
+    "Samurai": CharacterIcon("samurai_portrait.png"),
     "Kunoichi": CharacterIcon("kunoichi_portrait.png"),
-    "Dummy2": CharacterIcon("dummy_portrait.png"),
-    "Dummy3": CharacterIcon("dummy_portrait.png")
+    "Archer": CharacterIcon("archer_portrait.png"),
+    "Wizard": CharacterIcon("wizard_portrait.png")
 }

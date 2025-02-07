@@ -71,6 +71,28 @@ class ListButton(Button):
         self.opacity = 128
 
 
+class GameSaveButton(Button):
+    def __init__(self, slot_name: str, stage: str):
+        super().__init__()
+        if stage != -1:
+            self.is_empty = False
+        else:
+            self.is_empty = True
+        self.title = slot_name
+        self.stage = f"{get_string("stage")}: {stage}"
+        self.opacity = 128
+
+    def set_active(self):
+        self.opacity = 255
+
+    def set_inactive(self):
+        self.opacity = 128
+
+    def make_save(self, stage):
+        self.is_empty = False
+        self.stage = f"{get_string("stage")}: {stage}"
+
+
 class ItemButton(Button):
     def __init__(self, item, name: str, description: str, color):
         super().__init__()
@@ -299,6 +321,24 @@ def draw_list_buttons(group, screen, start_x, start_y, distance=92):
         button.set_alpha(group.buttons[i].opacity)
 
         screen.blit(button, (start_x, start_y + distance * i))
+
+
+def draw_save_buttons(group, screen, start_x, start_y):
+    for i in range(len(group.buttons)):
+        title_text = pygame.font.Font(load_font("UbuntuSans-SemiBold.ttf"), 52)
+        stage_text = pygame.font.Font(load_font("UbuntuSans-Regular.ttf"), 32)
+        rect = pygame.draw.rect(screen, "white", (start_x, start_y + 224 * i, 928, 200),
+                                1, 20)
+        if not group.buttons[i].is_empty:
+            title = title_text.render(group.buttons[i].title, True, "white")
+            stage = stage_text.render(group.buttons[i].stage, True, "white")
+            stage.set_alpha(group.buttons[i].opacity)
+            screen.blit(stage, (rect.x + 64, rect.y + 112))
+        else:
+            title = title_text.render(get_string("empty_slot"), True, "white")
+        title.set_alpha(group.buttons[i].opacity)
+
+        screen.blit(title, (rect.x + 64, rect.y + 52))
 
 
 def draw_battle_ui(current_ui, group, battle_icons, skill_group, item_group):

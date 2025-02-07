@@ -346,13 +346,16 @@ class BattleFinishState(State):
         super().__init__()
         InputManager.change_layout("ui")
         MusicManager.play_music("battle_end_music.mp3", True)
-        if end_type == "win":
+        self.end_type = end_type
+        if self.end_type == "win":
             self.title = "ПОБЕДА!"
             self.fill_mode = "image"
             sprite = pygame.sprite.Sprite()
             sprite.image = background
             sprite.rect = sprite.image.get_rect()
             self.group = pygame.sprite.Group(sprite)
+            self.reward = random.choice(list(items.ITEMS.items()))[1]
+            print(self.reward)
         else:
             self.title = "ПОБЕГ"
             self.fill_mode = "color"
@@ -362,7 +365,7 @@ class BattleFinishState(State):
         self.hero.image = self.frames[0]
         self.hero.rect = self.hero.image.get_rect()
         self.hero_group = pygame.sprite.Group(self.hero)
-        # self.hero.rect.move_ip(0, 500)
+        self.hero.rect.y = Data.get_screen_size()[1] // 2 + self.hero.rect.y // 2
         self.hero_animation_index = 0
 
         self.current_time = 0
@@ -386,13 +389,15 @@ class BattleFinishState(State):
                 match InputManager.current_input[InputManager.current_key]:
                     case "Confirm":
                         StateManager.change_state(DungeonState())
+                        if self.end_type == "win":
+                            current_data.add_item(self.reward)
 
     def run_animation(self, screen):
         self.current_time = pygame.time.get_ticks()
         if self.current_time - self.last_update > self.frame_delay:
             self.hero_animation_index = (self.hero_animation_index + 1) % len(self.frames)
             self.last_update = self.current_time
-            if self.hero.rect.x < 256:
+            if self.hero.rect.x < Data.get_screen_size()[0] // 2 - self.hero.rect.w // 2:
                 self.hero.rect.move_ip(10, 0)
 
         self.hero.image = self.frames[self.hero_animation_index]
@@ -404,11 +409,16 @@ class BattleFinishState(State):
             self.group.draw(screen)
         else:
             screen.fill("gray")
-        win_text = pygame.font.Font(load_font("Unbounded-Black.ttf"), 128)
+        win_text = pygame.font.Font(load_font("Unbounded-Black.ttf"), 100)
         screen.blit(
             win_text.render(self.title, True, "white"),
-            (Data.get_screen_size()[0] - win_text.size(self.title)[0] - 90,
-             Data.get_screen_size()[1] / 2 - win_text.size(self.title)[1] - 64))
+            (Data.get_screen_size()[0] // 2 - win_text.size(self.title)[0] // 2, 128))
+        if self.end_type == "win":
+            received_text = pygame.font.Font(load_font("UbuntuSans-Regular.ttf"), 42)
+            reward_text = f"{get_string("received")}: {self.reward.name}"
+            screen.blit(
+                received_text.render(reward_text,True, "white"),
+                (Data.get_screen_size()[0] // 2 - received_text.size(reward_text)[0] // 2, 256))
         self.run_animation(screen)
         screen.blit(draw_buttons(Hint("continue", "Space")), (0, 0))
 
