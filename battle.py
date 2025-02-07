@@ -20,8 +20,9 @@ from PIL import Image, ImageFilter
 
 
 class BattleState(State):
-    def __init__(self, enemy_group):
+    def __init__(self, enemy_group, map_structure):
         super().__init__()
+        self.map_structure = map_structure
         self.is_win = False
         self.input_layout = "battle"
         InputManager.change_layout(self.input_layout)
@@ -241,7 +242,7 @@ class BattleState(State):
     def escape(self):
         random_result = random.randrange(1, 4)
         if random_result == 3:
-            StateManager.change_state(BattleFinishState("escape"))
+            StateManager.change_state(BattleFinishState("escape", self.map_structure))
         else:
             self.move()
 
@@ -336,14 +337,15 @@ class BattleState(State):
                 if not self.player_party[i].is_alive:
                     self.player_party[i].heal(1)
                     self.player_party[i].is_alive = True
-            StateManager.change_state(BattleFinishState("win", background))
+            StateManager.change_state(BattleFinishState("win", self.map_structure, background))
 
         # screen.blit(show_dialogue(get_string("dialogue_ex"), get_string("dummy")))
 
 
 class BattleFinishState(State):
-    def __init__(self, end_type: str, background=None):
+    def __init__(self, end_type: str, map_structure, background=None):
         super().__init__()
+        self.map_structure = map_structure
         InputManager.change_layout("ui")
         MusicManager.play_music("battle_end_music.mp3", True)
         self.end_type = end_type
@@ -388,7 +390,7 @@ class BattleFinishState(State):
             if InputManager.current_key in InputManager.current_input:
                 match InputManager.current_input[InputManager.current_key]:
                     case "Confirm":
-                        StateManager.change_state(DungeonState())
+                        StateManager.change_state(DungeonState(self.map_structure))
                         if self.end_type == "win":
                             current_data.add_item(self.reward)
 

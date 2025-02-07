@@ -29,8 +29,6 @@ class Player:
         sin_a = math.sin(self.angle)
         cos_a = math.cos(self.angle)
 
-        keys = pygame.key.get_pressed()
-
         if pygame.time.get_ticks() - self.last_time > 550 and global_events.player_status == 'walk':
             if InputManager.current_key in InputManager.current_input:
                 match InputManager.current_input[InputManager.current_key]:
@@ -38,8 +36,6 @@ class Player:
                         pos = [self.position[0] + TILE * cos_a, self.position[1] + TILE * sin_a]
                         if not check_wall(world_map, pos):
                             if check_door(door_map, pos):
-                                print('good')
-                                global_events.player_status = 'attack'
                                 global_events.enter_the_door()
                             else:
                                 self.position = pos

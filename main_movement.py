@@ -1,8 +1,9 @@
 import pygame
+
+import items
 from settings import *
 from player import Player
-import math
-from map import world_map
+from map import generate_stage, world_map, door_map, event_map, mini_map
 from drawing import Drawing
 from state import State, StateManager
 from ui_elements import draw_portraits, draw_buttons, Hint, ListButton, draw_list_buttons, draw_blue_rect, ButtonGroup, \
@@ -12,11 +13,21 @@ from translatable_text import get_string
 from music_manager import MusicManager
 from input_manager import InputManager
 from PIL import Image, ImageFilter
+import global_events
+from game_resources import load_font
 
 
 class DungeonState(State):
-    def __init__(self):
+    def __init__(self, map_structure=None):
         super().__init__()
+        if map_structure is None:
+            generate_stage()
+        else:
+            global world_map, event_map, door_map, mini_map
+            world_map = map_structure[0]
+            event_map = map_structure[1]
+            event_map = map_structure[2]
+            event_map = map_structure[3]
         InputManager.change_layout("movement")
         self.mode = "gameplay"
 
@@ -35,6 +46,15 @@ class DungeonState(State):
                                         ListButton(get_string("load")), ListButton(get_string("to_menu")))
         self.items_buttons = ButtonGroup()
         self.selected_character_index = 0
+
+        self.stage_text = pygame.font.Font(load_font("UbuntuSans-SemiBold.ttf"), 52)
+        self.stage_text_pos = pygame.display.get_surface().size[1] // 2 - 26 + 100
+
+        self.current_time = 0
+        self.last_update = pygame.time.get_ticks()
+        self.frame_delay = 50
+
+        self.animation_step = 0
 
     def update(self, event):
         if event.type == pygame.KEYDOWN:
@@ -90,13 +110,15 @@ class DungeonState(State):
                         elif self.mode == "save":
                             save_data.Data.save_game(self.save_buttons_group.cur_index + 1,
                                                      save_data.current_data.get_items(),
-                                                        save_data.current_data.stage,
+                                                     save_data.current_data.stage,
                                                      save_data.current_data.player_group)
                             self.save_buttons_group.cur_button.make_save(save_data.current_data.stage)
                         elif self.mode == "items":
-                            (save_data.current_data.player_items[self.items_buttons.cur_index]
-                             .use(save_data.current_data.player_group[self.selected_character_index]))
-                            self.set_item_buttons()
+                            if isinstance(save_data.current_data.player_items[self.items_buttons.cur_index],
+                                          items.HealItem):
+                                (save_data.current_data.player_items[self.items_buttons.cur_index]
+                                 .use(save_data.current_data.player_group[self.selected_character_index]))
+                                self.set_item_buttons()
                         elif self.mode == "load":
                             save_data.Data.load_game(self.save_buttons_group.cur_index + 1, save_data.current_data)
                             StateManager.change_state(DungeonState())
@@ -108,6 +130,11 @@ class DungeonState(State):
                         if self.mode == "items":
                             self.selected_character_index = ((self.selected_character_index + 1) %
                                                              len(save_data.current_data.player_group))
+        if global_events.is_door_reached:
+            self.mode = "stage_change"
+            self.player.x, self.player.y = 150, 150
+            self.player.correction_move()
+            global_events.is_door_reached = False
 
     def set_item_buttons(self):
         self.items_buttons.buttons.clear()
@@ -140,7 +167,7 @@ class DungeonState(State):
                 self.drawing.world(screen, self.player.pos, self.player.angle)
                 mini_map = self.drawing.mini_map(self.player)
                 screen.blit(mini_map, (32, 52))
-                screen.blit(print_stage(0), (32, mini_map.size[1] + 24))
+                screen.blit(print_stage(save_data.current_data.stage), (32, mini_map.size[1] + 24))
                 screen.blit(draw_portraits(self.player_party), (0, 0))
                 screen.blit(draw_buttons(Hint("menu", "Tab"),
                                          Hint("save", "H")), (0, 0))
@@ -175,3 +202,22 @@ class DungeonState(State):
                                          Hint("navigation", "W", "S"),
                                          Hint("target_selection", "A", "D"),
                                          Hint("select", "Space")), (0, 0))
+            case "stage_change":
+                screen.fill("black")
+                stage_text = f"{get_string("stage")}: {save_data.current_data.stage}"
+                screen.blit(self.stage_text.render(stage_text,True, "white"),
+                            (screen.size[0] // 2 - self.stage_text.size(stage_text)[0] // 2, self.stage_text_pos))
+                if self.stage_text_pos != screen.size[1] // 2 - 26:
+                    self.current_time = pygame.time.get_ticks()
+                    if self.current_time - self.last_update > self.frame_delay:
+                        self.stage_text_pos -= 5
+                    self.animation_step += 1
+                else:
+                    print(self.animation_step)
+                    if self.animation_step >= 50:
+                        self.mode = "gameplay"
+                        self.animation_step = 0
+                    else:
+                        self.current_time = pygame.time.get_ticks()
+                        if self.current_time - self.last_update > self.frame_delay:
+                            self.animation_step += 1

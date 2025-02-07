@@ -3,7 +3,7 @@ from game_resources import load_audio
 
 
 class MusicManager:
-    volume = 0.5
+    volume = 0
 
     @staticmethod
     def play_music(audio, is_loop=False):

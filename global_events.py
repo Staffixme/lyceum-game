@@ -6,9 +6,11 @@ import items
 from PIL import Image, ImageFilter, ImageEnhance
 from music_manager import MusicManager
 from random import randrange, choice
+from save_data import current_data
+from map import world_map, event_map, door_map, mini_map, generate_stage
 
 player_status = 'walk'
-number_lvl = 0
+is_door_reached = False
 
 
 def attack_enemy():
@@ -16,7 +18,12 @@ def attack_enemy():
 
 
 def enter_the_door():
-    pass
+    global is_door_reached
+    print("up!")
+    current_data.stage += 1
+    generate_stage()
+    is_door_reached = True
+    print(current_data.stage)
 
 
 class DungeonToBattleState(State):
@@ -49,7 +56,7 @@ class DungeonToBattleState(State):
             screen.blit(img, (0, 0))
         elif self.step > 25:
             from battle import BattleState
-            StateManager.change_state(BattleState(self.enemy_party))
+            StateManager.change_state(BattleState(self.enemy_party, (world_map, event_map, door_map, mini_map)))
             global player_status
             player_status = "walk"
 

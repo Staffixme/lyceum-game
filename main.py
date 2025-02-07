@@ -1,4 +1,5 @@
 import sys
+import os
 
 import pygame
 from ui_elements import PLAYERS_ICONS, set_images, draw_buttons, Hint, draw_list_buttons, ListButton, ButtonGroup, \
@@ -7,9 +8,8 @@ from save_data import current_data, Data
 import items
 import dialogue_system
 from state import StateManager, State
-from translatable_text import get_string
-import pygame_gui
-from input_manager import InputManager, MENU_LAYOUT
+from translatable_text import get_string, change_language
+from input_manager import InputManager
 from main_movement import DungeonState
 import settings
 from game_resources import load_image
@@ -56,7 +56,7 @@ class MainMenu(State):
                                 self.get_blurred_background()
                                 self.mode = "load"
                             elif self.button_group.cur_index == 2:
-                                StateManager.change_state(DungeonState())
+                                change_language()
                             elif self.button_group.cur_index == 3:
                                 sys.exit()
                         elif self.mode == "load":

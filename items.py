@@ -183,7 +183,8 @@ class Character:
 
 
 class Hero(Character):
-    def __init__(self, name: str, hp: int, mana: int, weapon: Melee, skills: tuple, equipment, sprite: tuple, portrait, sprite_size=(256, 256)):
+    def __init__(self, name: str, hp: int, mana: int, weapon: Melee, skills: tuple, equipment, sprite: tuple, portrait,
+                 sprite_size=(256, 256)):
         super().__init__(name, hp, weapon, skills, sprite, sprite_size=sprite_size)
         self.mana = mana
         self.cur_mana = mana
@@ -253,22 +254,24 @@ class AttackItem(Item):
 CHARACTERS_SPRITES = pygame.sprite.Group()
 
 SKILLS = {
-    "Test_skill": AttackSkill("Атакующий навык", "Наносит большой урон одному врагу", 200,
-                              False, 20),
-    "Test_skill_group": AttackSkill("Массовый атакующий навык", "Наносит средний урон всем врагу",
-                                    100, True, 25),
-    "Heal_skill": HealSkill("Исцеление", "Исцеляет небольшое количество ОЗ одному союзнику", 50,
+    "Fireball": AttackSkill(get_string("fireball"), get_string("fireball_desc"), 250,
+                            False, 20),
+    "Slash": AttackSkill(get_string("slash"), get_string("slash_desc"),
+                         100, True, 25),
+    "Heal_skill": HealSkill(get_string("heal"), get_string("heal_desc"), 50,
                             False, 5),
     "Recover": HealSkill(get_string("recover"), get_string("recover_desc"), 250,
-                            False, 20),
+                         False, 20),
     "Absolute_heal": HealSkill(get_string("absolute_heal"), get_string("absolute_heal_desc"), 500,
-                         False, 55),
+                               True, 55),
 }
 
 ITEMS = {
-    "Aid": HealItem("Аптечка", "Исцеляет среднее количество ОЗ одному союзнику", 100, False, 1),
-    "Aid_kit": HealItem("Набор первой помощи", "Исцеляет большое количество ОЗ всем союзникам", 500, True, 2),
-    "Imba": AttackItem("Этот предмет просто имба", "Урон, мгновенно убивающий врага", 999999, False, 3),
+    "Aid": HealItem(get_string("aid"), get_string("aid_desc"), 75, False, 1),
+    "Heal_poison": HealItem(get_string("heal_poison"), get_string("heal_poison_desc"), 75, False, 1),
+    "Charm_of_light": HealItem(get_string("charm_of_light"), get_string("charm_of_light_desc"), 500,
+                               True, 2),
+    "Poison": AttackItem(get_string("poison"), get_string("poison_desc"), 300, False, 3),
 }
 
 WEAPONS = {
@@ -281,15 +284,15 @@ WEAPONS = {
 
 CHARACTERS = {
     "Samurai": Hero(get_string("Samurai"), 375, 110, WEAPONS["Katana"],
-                  (SKILLS["Test_skill"], SKILLS["Test_skill_group"], SKILLS["Heal_skill"]),
-                  None,
-                  ((load_image("samurai_idle.png"), 5),
-                   (load_image("samurai_attack.png"), 4),
-                   (load_image("samurai_defend.png"), 2),
-                   (load_image("samurai_cast.png"), 7),
-                   (load_image("samurai_death.png"), 6)),
-                  CHARACTERS_PORTRAITS["Samurai"]),
-    "Archer": Hero(get_string("Archer"), 312, 90, WEAPONS["Bow"], (SKILLS["Test_skill"], SKILLS["Heal_skill"]),
+                    (SKILLS["Fireball"], SKILLS["Slash"]),
+                    None,
+                    ((load_image("samurai_idle.png"), 5),
+                     (load_image("samurai_attack.png"), 4),
+                     (load_image("samurai_defend.png"), 2),
+                     (load_image("samurai_cast.png"), 7),
+                     (load_image("samurai_death.png"), 6)),
+                    CHARACTERS_PORTRAITS["Samurai"]),
+    "Archer": Hero(get_string("Archer"), 312, 90, WEAPONS["Bow"], (SKILLS["Fireball"], SKILLS["Heal_skill"]),
                    None,
                    ((load_image("archer_idle.png"), 9),
                     (load_image("archer_attack.png"), 14),
@@ -297,14 +300,15 @@ CHARACTERS = {
                     (load_image("archer_cast.png"), 9),
                     (load_image("archer_death.png"), 5)),
                    CHARACTERS_PORTRAITS["Archer"]),
-    "Kunoichi": Hero(get_string("Kunoichi"), 275, 75, WEAPONS["Chain"], (SKILLS["Recover"], SKILLS["Absolute_heal"]), None,
-                   ((load_image("kunoichi_idle.png"), 9),
-                    (load_image("kunoichi_attack.png"), 8),
-                    (load_image("kunoichi_defend.png"), 9),
-                    (load_image("kunoichi_cast.png"), 6),
-                    (load_image("kunoichi_death.png"), 5)),
-                   CHARACTERS_PORTRAITS["Kunoichi"]),
-    "Wizard": Hero(get_string("Wizard"), 250, 100, WEAPONS["Knife"], (SKILLS["Heal_skill"],), None,
+    "Kunoichi": Hero(get_string("Kunoichi"), 275, 75, WEAPONS["Chain"], (SKILLS["Recover"], SKILLS["Absolute_heal"]),
+                     None,
+                     ((load_image("kunoichi_idle.png"), 9),
+                      (load_image("kunoichi_attack.png"), 8),
+                      (load_image("kunoichi_defend.png"), 9),
+                      (load_image("kunoichi_cast.png"), 6),
+                      (load_image("kunoichi_death.png"), 5)),
+                     CHARACTERS_PORTRAITS["Kunoichi"]),
+    "Wizard": Hero(get_string("Wizard"), 250, 100, WEAPONS["Knife"], (SKILLS["Fireball"], SKILLS["Recover"]), None,
                    ((load_image("wizard_idle.png"), 7),
                     (load_image("wizard_attack.png"), 4),
                     (load_image("wizard_defend.png"), 3),
@@ -316,18 +320,18 @@ CHARACTERS = {
 
 ENEMIES = {
     "Magma": (get_string("Magma"), 225, WEAPONS["Katana"], (None,),
-               ((load_image("magma_idle.png"), 4),
-                (load_image("magma_attack.png"), 8),
-                (load_image("magma_idle.png"), 4),
-                (load_image("magma_attack.png"), 8),
-                (load_image("magma_death.png"), 7)),
+              ((load_image("magma_idle.png"), 4),
+               (load_image("magma_attack.png"), 8),
+               (load_image("magma_idle.png"), 4),
+               (load_image("magma_attack.png"), 8),
+               (load_image("magma_death.png"), 7)),
               ),
     "Slime": (get_string("Slime"), 125, WEAPONS["Enemy_wp"], (None,),
-               ((load_image("slime_idle.png"), 7),
-                (load_image("slime_attack.png"), 6),
-                (load_image("slime_idle.png"), 7),
-                (load_image("slime_attack.png"), 6),
-                (load_image("slime_death.png"), 14))),
+              ((load_image("slime_idle.png"), 7),
+               (load_image("slime_attack.png"), 6),
+               (load_image("slime_idle.png"), 7),
+               (load_image("slime_attack.png"), 6),
+               (load_image("slime_death.png"), 14))),
     "Dummy5": ("Враг 3", 200, WEAPONS["Enemy_wp"], (None,),
                ((load_image("IDLE.png"), 7),
                 (load_image("ATTACK 1.png"), 6),
