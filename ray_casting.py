@@ -1,6 +1,6 @@
 import pygame
 import settings
-from map import world_map, event_map
+from map import world_map, door_map
 
 
 def mapping(a, b):
@@ -26,9 +26,9 @@ def ray_casting(sc, player_pos, player_angle, textures):
             if tile_v in world_map:
                 texture_v = world_map[tile_v]
                 break
-            # if tile_v in event_map:
-            #     texture_v = event_map[tile_v]
-            #     break
+            if tile_v in door_map:
+                texture_v = door_map[tile_v]
+                break
             x += dx * settings.TILE
 
         # horizontals
@@ -40,9 +40,9 @@ def ray_casting(sc, player_pos, player_angle, textures):
             if tile_h in world_map:
                 texture_h = world_map[tile_h]
                 break
-            # if tile_h in event_map:
-            #     texture_h = event_map[tile_h]
-            #     break
+            if tile_h in door_map:
+                texture_h = door_map[tile_h]
+                break
             y += dy * settings.TILE
 
         # projection

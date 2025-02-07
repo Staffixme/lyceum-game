@@ -1,7 +1,7 @@
 import pygame
 import settings
 from ray_casting import ray_casting
-from map import mini_map
+from map import mini_map, door_map
 from save_data import Data
 
 
@@ -12,6 +12,7 @@ class Drawing:
                          '2': pygame.image.load('lyceum-game-main/texture/wall_2.png').convert(),
                          'B': pygame.image.load('lyceum-game-main/sprites/box_1.png').convert(),
                          'E': pygame.image.load('lyceum-game-main/sprites/enemy_1.png').convert(),
+                         '!': pygame.image.load('lyceum-game-main/texture/door_3.png').convert(),
 
                          'S': pygame.image.load('lyceum-game-main/texture/sky_3.png').convert(),
                          'M': pygame.image.load('lyceum-game-main/texture/Floor_1.png').convert(),
@@ -39,7 +40,7 @@ class Drawing:
         map_x, map_y = player.x // settings.MAP_SCALE, player.y // settings.MAP_SCALE
         pygame.draw.line(sc_map, "yellow", (map_x, map_y), (map_x + 12 * settings.math.cos(player.angle),
                                                  map_y + 12 * settings.math.sin(player.angle)), 2)
-        pygame.draw.circle(sc_map, "red", (int(map_x), int(map_y)), 3)
+        pygame.draw.circle(sc_map, "blue", (int(map_x), int(map_y)), 3)
         for x, y in mini_map:
-            pygame.draw.rect(sc_map, "white", (x, y, settings.MAP_TILE, settings.MAP_TILE))
+            pygame.draw.rect(sc_map, "orange", (x, y, settings.MAP_TILE, settings.MAP_TILE))
         return sc_map

@@ -1,5 +1,5 @@
 from settings import *
-from map import world_map, event_map
+from map import world_map, event_map, door_map
 import global_events
 
 import pygame
@@ -37,11 +37,17 @@ class Player:
                     case "Forward":
                         pos = [self.position[0] + TILE * cos_a, self.position[1] + TILE * sin_a]
                         if not check_wall(world_map, pos):
-                            self.position = pos
-                            self.correction_move()
-                        if check_attack(event_map, pos):
-                            global_events.player_status = 'attack'
-                            global_events.attack_enemy()
+                            if check_door(door_map, pos):
+                                print('good')
+                                global_events.player_status = 'attack'
+                                global_events.enter_the_door()
+                            else:
+                                self.position = pos
+                                self.correction_move()
+
+                                if check_attack(event_map, pos):
+                                    global_events.player_status = 'attack'
+                                    global_events.attack_enemy()
                     case "Back":
                         self.rotate += 1.58 * 2
                         self.rotate %= 6.320001
@@ -127,5 +133,12 @@ def check_attack(this_map, position):
     for tile in this_map:
         if tile[0] < position[0] < tile[0] + 100 and tile[1] < position[1] < tile[1] + 100:
             del event_map[tile]
+            return True
+    return False
+
+
+def check_door(this_map, position):
+    for tile in this_map:
+        if tile[0] < position[0] < tile[0] + 100 and tile[1] < position[1] < tile[1] + 100:
             return True
     return False

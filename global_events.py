@@ -8,10 +8,15 @@ from music_manager import MusicManager
 from random import randrange, choice
 
 player_status = 'walk'
+number_lvl = 0
 
 
 def attack_enemy():
     StateManager.change_state(DungeonToBattleState())
+
+
+def enter_the_door():
+    pass
 
 
 class DungeonToBattleState(State):
